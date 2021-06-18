@@ -35,7 +35,7 @@ period = 1. / args.freq
 track = dict([(ac_id, deque()) for ac_id in id_dict.keys()])
 
 
-def storeOptiTrackData1():
+def storeOptiTrackData():
     while True:
         with open('Data/OptiTrackData.csv', 'w', newline='') as f:
             dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
@@ -50,26 +50,6 @@ def storeOptiTrackData1():
             dataWriter.writerow(b)
             f.flush()
             sleep(period)
-
-
-def storeOptiTrackData():
-    with open('Data/OptiTrackData.csv', 'w', newline='') as f:
-        dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
-        while True:
-            a = list(natnet.rigidBodyList[0])
-            b = []
-            for element in a:
-                if type(element) is not bool:
-                    if type(element) is tuple:
-                        for i in element:
-                            b.append(i)
-                    else:
-                        b.append(element)
-
-            dataWriter.writerow(b)
-            f.flush()
-            sleep(period)
-
 
 def store_track(ac_id, pos, t):
     if ac_id in id_dict.keys():
@@ -109,7 +89,7 @@ try:
     # This will run perpetually, and operate on a separate thread.
     natnet.run()
     sleep(0.1)
-    storeOptiTrackData1()
+    storeOptiTrackData()
 except (KeyboardInterrupt, SystemExit):
     print("Shutting down natnet interfaces...")
     natnet.stop()

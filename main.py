@@ -6,11 +6,20 @@ import numpy as np
 import csv
 
 
+# def tail(fn, n):
+#     with open(fn, 'r') as f:
+#         f.readline()
+#         lines = f.readlines()
+#     return [list(map(float, line.strip().split(','))) for line in lines[-n:]]
+
 def tail(fn, n):
+    # Ouvrez le fichier et récupérez toutes les lignes dans une liste
     with open(fn, 'r') as f:
-        f.readline()
+        # f.readline()
         lines = f.readlines()
-    return [list(map(float, line.strip().split(','))) for line in lines[-n:]]
+
+    # Renvoie une chaîne après en avoir fait un tableau.Au fait str->Conversion de type en float
+    return [list(map(eval, line.strip().split(','))) for line in lines[-n:]]
 
 
 def readOptiTrackData(fn):
@@ -35,7 +44,8 @@ class app_1(QtWidgets.QMainWindow):
         self.mainView.addItem(ground)
 
         # pos = np.array([tail('optiTrackData.csv', 1)[0][1:4]])
-        pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
+        # pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
+        pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
         self.sp = gl.GLScatterPlotItem(pos=pos, size=5, pxMode=True)
         self.mainView.addItem(self.sp)
 
@@ -44,7 +54,8 @@ class app_1(QtWidgets.QMainWindow):
         self.timer.start()
 
     def update(self):
-        pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
+        # pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
+        pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
         self.sp.setData(pos=pos)
 
 
