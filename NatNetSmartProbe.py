@@ -51,6 +51,7 @@ def storeOptiTrackData():
             f.flush()
             sleep(period)
 
+
 def store_track(ac_id, pos, t):
     if ac_id in id_dict.keys():
         track[ac_id].append((pos, t))

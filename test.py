@@ -1,10 +1,36 @@
-a = "{accel : [-0.22034180164337158, 0.6083349585533142, 9.896221160888672], gyro : [0.04703351855278015, 0.01942518912255764, -0.010286974720656872], attitude : [0.057178135961294174, -0.016436221078038216, -1.5960192680358887, -1000.0], tas : 7.010409832000732, eas : 10.035507202148438, alpha : -25.174646377563477, beta : 14.336936950683594, pressure : 99940.234375, temperature : 43.90999984741211, rho : 1.1156949996948242, p_diff_C_raw : 0.0, t_diff_C_raw : 42.54999923706055, p_diff_H_raw : -1.6666667461395264, t_diff_H_raw : 41.81999969482422, p_diff_V_raw : 3.3333334922790527, t_diff_V_raw : 41.334999084472656, }"
+from scipy.spatial.transform import Rotation as R
+import numpy as np
+from UsefulFunction import tail
 
-print(a)
-b = a.split(',')
+vect = [1, 1, 1]
+quat = np.array(tail('Data/OptiTrackData.csv', 1)[0][4:8])
+print(quat)
+rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
+print(rotation)
+RepereSP = rotation.apply(vect)
+print(tuple(RepereSP))
 
-TAS = b[10]
-EAS = b[11]
-alpha = b[12]
-beta = b[13]
-print(float(TAS.split(' ')[-1]), float(EAS.split(' ')[-1]), float(alpha.split(' ')[-1]), float(beta.split(' ')[-1]))
+ok = np.array(tail('Data/OptiTrackData.csv', 1)[0][1:4])
+
+print(ok)
+
+#
+# RepereSPini = np.array([[1,0,0],
+#                      [0,1,0],
+#                      [0,0,1]])
+# x=1
+# x=2
+# x=3
+#
+# with open("Data/OptiTrackData.csv", 'r') as f:
+#     line = f.readline()
+#     data = list(map(eval,line.strip().split(',')))
+#     print(data[4:8])
+#     #rotation = R.from_quat(data[4:8])
+#     rotation = R.from_quat([0,0,0,1])
+#     RepereSP = rotation.apply(RepereSPini)
+#     np.diag(RepereSP[1,1] + X, RepereSP[2.])
+#     a=
+#     print(a)
+#     print(RepereSP)
+#

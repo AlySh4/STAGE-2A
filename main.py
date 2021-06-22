@@ -3,31 +3,10 @@ from pyqtgraph.Qt import QtCore, QtWidgets
 import pyqtgraph.opengl as gl
 from PyQt5 import uic
 import numpy as np
-import csv
+from UsefulFunction import tail, SmartProbeVect
 
 
-# def tail(fn, n):
-#     with open(fn, 'r') as f:
-#         f.readline()
-#         lines = f.readlines()
-#     return [list(map(float, line.strip().split(','))) for line in lines[-n:]]
 
-def tail(fn, n):
-    # Ouvrez le fichier et récupérez toutes les lignes dans une liste
-    with open(fn, 'r') as f:
-        # f.readline()
-        lines = f.readlines()
-
-    # Renvoie une chaîne après en avoir fait un tableau.Au fait str->Conversion de type en float
-    return [list(map(eval, line.strip().split(','))) for line in lines[-n:]]
-
-
-def readOptiTrackData(fn):
-    with open(fn, 'r') as f:
-        reader = csv.reader(f)
-        b = next(reader)
-        c = b
-        return [list(map(eval, c))]
 
 
 class app_1(QtWidgets.QMainWindow):
@@ -43,20 +22,31 @@ class app_1(QtWidgets.QMainWindow):
         ground.scale(1, 1, 0)
         self.mainView.addItem(ground)
 
-        # pos = np.array([tail('optiTrackData.csv', 1)[0][1:4]])
-        # pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
-        pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
-        self.sp = gl.GLScatterPlotItem(pos=pos, size=5, pxMode=True)
-        self.mainView.addItem(self.sp)
+        # pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
+        # self.sp = gl.GLScatterPlotItem(pos=pos, size=5, pxMode=True)
+        # self.mainView.addItem(self.sp)
+
+        Xdot = tuple(tail('Data/OptiTrackData.csv', 1)[0][1:4])
+        Ydotmouv = SmartProbeVect()
+        Ydot = tuple([Xdot[0] + Ydotmouv[0], Xdot[1] + Ydotmouv[1], Xdot[2] + Ydotmouv[2]])
+
+        SPpos = np.array([Xdot, Ydot])
+
+        self.SmartProbe = gl.GLLinePlotItem(pos=SPpos, width=1, antialias=False)
+        self.mainView.addItem(self.SmartProbe)
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start()
 
     def update(self):
-        # pos = np.array([readOptiTrackData('Data/OptiTrackData.csv')[0][1:4]])
-        pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
-        self.sp.setData(pos=pos)
+        # pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
+        # self.sp.setData(pos=pos)
+        Xdot = tuple(tail('Data/OptiTrackData.csv', 1)[0][1:4])
+        Ydotmouv = SmartProbeVect()
+        Ydot = tuple([Xdot[0] + Ydotmouv[0], Xdot[1] + Ydotmouv[1], Xdot[2] + Ydotmouv[2]])
+        SPpos = np.array([Xdot, Ydot])
+        self.SmartProbe.setData(pos=SPpos)
 
 
 if __name__ == '__main__':
