@@ -23,14 +23,26 @@ class app_1(QtWidgets.QMainWindow):
 
         axis = gl.GLAxisItem()
         self.mainView.addItem(axis)
-        ground = gl.GLGridItem()
-        ground.scale(1, 1, 0)
+
+        ground = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
+        Wall1 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
+        Wall2 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
+
+        Wall1.rotate(90, 0, 1, 0)
+        Wall2.rotate(90, 1, 0, 0)
+        Wall1.translate(-5, 0, 5)
+        Wall2.translate(0, -5, 5)
         self.mainView.addItem(ground)
+        self.mainView.addItem(Wall1)
+        self.mainView.addItem(Wall2)
 
         self.SmartProbe = gl.GLLinePlotItem(width=1, antialias=True)
         self.mainView.addItem(self.SmartProbe)
 
-        self.Wind = gl.GLLinePlotItem(width=5, color=(1, 0, 0, 1), antialias=True)
+        self.WindVectDot = gl.GLScatterPlotItem(size=15, color=(1, 0, 0, 1))
+        self.mainView.addItem(self.WindVectDot)
+
+        self.Wind = gl.GLLinePlotItem(width=3, color=(1, 0, 0, 1), antialias=True)
         self.mainView.addItem(self.Wind)
 
         self.timer = QtCore.QTimer()
@@ -54,6 +66,9 @@ class app_1(QtWidgets.QMainWindow):
         self.pitchangleLCDNumber.display(np.degrees(smartprobeData[2]))
         self.sideslipLCDNumber.display(np.degrees(smartprobeData[3]))
 
+        WindDotpos = np.array([WindP2])
+
+        self.WindVectDot.setData(pos=WindDotpos)
         self.SmartProbe.setData(pos=SPpos)
         self.Wind.setData(pos=Windpos)
 

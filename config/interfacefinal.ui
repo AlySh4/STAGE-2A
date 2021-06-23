@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1123</width>
-    <height>651</height>
+    <width>1158</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -95,14 +95,29 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Speed</string>
+             <string>TAS (m/s)</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLCDNumber" name="SpeedLCDNumber">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="lineWidth">
+             <number>5</number>
+            </property>
             <property name="segmentStyle">
-             <enum>QLCDNumber::Filled</enum>
+             <enum>QLCDNumber::Flat</enum>
             </property>
            </widget>
           </item>
@@ -113,12 +128,34 @@
           <item>
            <widget class="QLabel" name="angleofattackLabel">
             <property name="text">
-             <string>Angle of Attack</string>
+             <string>Angle of Attack (°)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="angleofattackLCDNumber"/>
+           <widget class="QLCDNumber" name="angleofattackLCDNumber">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="lineWidth">
+             <number>3</number>
+            </property>
+            <property name="smallDecimalPoint">
+             <bool>false</bool>
+            </property>
+            <property name="segmentStyle">
+             <enum>QLCDNumber::Flat</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -127,12 +164,25 @@
           <item>
            <widget class="QLabel" name="pitchangleLabel">
             <property name="text">
-             <string>Pitch Angle</string>
+             <string>Pitch Angle (°)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="pitchangleLCDNumber"/>
+           <widget class="QLCDNumber" name="pitchangleLCDNumber">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="lineWidth">
+             <number>3</number>
+            </property>
+            <property name="segmentStyle">
+             <enum>QLCDNumber::Flat</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -141,12 +191,25 @@
           <item>
            <widget class="QLabel" name="sideslipeLabel">
             <property name="text">
-             <string>Dérapage</string>
+             <string>Dérapage (°)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="sideslipLCDNumber"/>
+           <widget class="QLCDNumber" name="sideslipLCDNumber">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="lineWidth">
+             <number>3</number>
+            </property>
+            <property name="segmentStyle">
+             <enum>QLCDNumber::Flat</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -253,7 +316,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1123</width>
+     <width>1158</width>
      <height>21</height>
     </rect>
    </property>

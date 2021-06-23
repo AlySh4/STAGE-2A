@@ -16,8 +16,10 @@ def SmartProbeVect():
 
 
 def WindVect():
-    angles = np.array(tail('Data/SmartProbeData.csv', 1)[0][2:])
+    # angles = np.array(tail('Data/SmartProbeData.csv', 1)[0][2:])
+    SPData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
     quat = np.array(tail('Data/OptiTrackData.csv', 1)[0][4:8])
-    vect = [-np.cos(angles[0]), np.sin(angles[1]), -np.sin(angles[0]), ]  # vecteur du vent dans le repère mouvant
+    vect = [-np.cos(SPData[2]), np.sin(SPData[3]), -np.sin(SPData[2]), ]  # vecteur du vent dans le repère mouvant
+    vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
     return rotation.apply(vect)
