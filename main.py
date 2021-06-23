@@ -1,12 +1,11 @@
 import sys
-from pyqtgraph.Qt import QtCore, QtWidgets
 import pyqtgraph.opengl as gl
-from PyQt5 import uic
 import numpy as np
-from UsefulFunction import tail, SmartProbeVect
 
-
-
+from pyqtgraph import Vector
+from pyqtgraph.Qt import QtCore, QtWidgets
+from PyQt5 import uic
+from UsefulFunction import tail, SmartProbeVect, WindVect
 
 
 class app_1(QtWidgets.QMainWindow):
@@ -16,37 +15,59 @@ class app_1(QtWidgets.QMainWindow):
         self.setWindowTitle('Test GL app')
         self.show()
 
+        # buttonConnection
+        self.xOyPButton.clicked.connect(self.xOyView)
+        self.xOzPButton.clicked.connect(self.xOzView)
+        self.yOzPButton.clicked.connect(self.yOzView)
+        self.resetPButton.clicked.connect(self.resetView)
+
         axis = gl.GLAxisItem()
         self.mainView.addItem(axis)
         ground = gl.GLGridItem()
         ground.scale(1, 1, 0)
         self.mainView.addItem(ground)
 
-        # pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
-        # self.sp = gl.GLScatterPlotItem(pos=pos, size=5, pxMode=True)
-        # self.mainView.addItem(self.sp)
-
-        Xdot = tuple(tail('Data/OptiTrackData.csv', 1)[0][1:4])
-        Ydotmouv = SmartProbeVect()
-        Ydot = tuple([Xdot[0] + Ydotmouv[0], Xdot[1] + Ydotmouv[1], Xdot[2] + Ydotmouv[2]])
-
-        SPpos = np.array([Xdot, Ydot])
-
-        self.SmartProbe = gl.GLLinePlotItem(pos=SPpos, width=1, antialias=False)
+        self.SmartProbe = gl.GLLinePlotItem(width=1, antialias=True)
         self.mainView.addItem(self.SmartProbe)
+
+        self.Wind = gl.GLLinePlotItem(width=5, color=(1, 0, 0, 1), antialias=True)
+        self.mainView.addItem(self.Wind)
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start()
 
     def update(self):
-        # pos = np.array([tail('Data/OptiTrackData.csv', 1)[0][1:4]])
-        # self.sp.setData(pos=pos)
-        Xdot = tuple(tail('Data/OptiTrackData.csv', 1)[0][1:4])
-        Ydotmouv = SmartProbeVect()
-        Ydot = tuple([Xdot[0] + Ydotmouv[0], Xdot[1] + Ydotmouv[1], Xdot[2] + Ydotmouv[2]])
-        SPpos = np.array([Xdot, Ydot])
+        P1 = tuple(tail('Data/OptiTrackData.csv', 1)[0][1:4])
+        SPP2prim = SmartProbeVect()
+        SPP2 = tuple([P1[0] + SPP2prim[0], P1[1] + SPP2prim[1], P1[2] + SPP2prim[2]])
+        SPpos = np.array([P1, SPP2])
+
+        WindP2prim = WindVect()
+        WindP2 = tuple([P1[0] + WindP2prim[0], P1[1] + WindP2prim[1], P1[2] + WindP2prim[2]])
+        Windpos = np.array([P1, WindP2])
+
+        smartprobeData = tail('Data/SmartProbeData.csv', 1)[0]
+
+        self.SpeedLCDNumber.display(smartprobeData[0])
+        self.angleofattackLCDNumber.display(np.degrees(smartprobeData[2]))
+        self.pitchangleLCDNumber.display(np.degrees(smartprobeData[2]))
+        self.sideslipLCDNumber.display(np.degrees(smartprobeData[3]))
+
         self.SmartProbe.setData(pos=SPpos)
+        self.Wind.setData(pos=Windpos)
+
+    def xOyView(self):
+        self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=90, azimuth=270, distance=25)  # xOy
+
+    def xOzView(self):
+        self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=0, azimuth=270, distance=25)  # xOz
+
+    def yOzView(self):
+        self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=0, azimuth=360, distance=25)  # yOz
+
+    def resetView(self):
+        self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=30, azimuth=45, distance=10)
 
 
 if __name__ == '__main__':

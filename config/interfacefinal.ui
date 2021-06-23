@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>979</width>
-    <height>573</height>
+    <width>1123</width>
+    <height>651</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,44 +72,6 @@
          </size>
         </property>
        </widget>
-      </item>
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="leftVLayout">
-        <item row="1" column="0">
-         <widget class="QRadioButton" name="xOyRButton">
-          <property name="text">
-           <string>xOy</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <spacer name="leftVLayoutSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="0">
-         <widget class="QRadioButton" name="xOzRButton">
-          <property name="text">
-           <string>xOz</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QRadioButton" name="zOyRButton">
-          <property name="text">
-           <string>zOy</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item row="0" column="3" colspan="2">
        <layout class="QVBoxLayout" name="rightVLayout" stretch="0,0,0,0,0,0">
@@ -237,6 +199,51 @@
         </item>
        </layout>
       </item>
+      <item row="0" column="1">
+       <layout class="QGridLayout" name="leftVLayout">
+        <item row="7" column="0">
+         <spacer name="leftVLayoutSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="xOyPButton">
+          <property name="text">
+           <string>xOy</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QPushButton" name="yOzPButton">
+          <property name="text">
+           <string>yOz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="xOzPButton">
+          <property name="text">
+           <string>xOz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="resetPButton">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
    </layout>
@@ -246,7 +253,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>979</width>
+     <width>1123</width>
      <height>21</height>
     </rect>
    </property>
