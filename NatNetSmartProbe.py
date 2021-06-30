@@ -35,11 +35,27 @@ period = 1. / args.freq
 track = dict([(ac_id, deque()) for ac_id in id_dict.keys()])
 
 
-def storeOptiTrackData():
+# def storeOptiTrackData():
+#     while True:
+#         with open('Data/OptiTrackData.csv', 'w', newline='') as f:
+#             dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
+#             a = list(natnet.rigidBodyList[0])
+#             b = []
+#             for element in a:
+#                 if type(element) is tuple:
+#                     for i in element:
+#                         b.append(i)
+#                 else:
+#                     b.append(element)
+#             dataWriter.writerow(b)
+#             f.flush()
+#             sleep(period)
+
+def storeOptiTrackData(rigidBodyList, stamp):  # TODO : ajouter le lien avec le rigidbody_id
     while True:
         with open('Data/OptiTrackData.csv', 'w', newline='') as f:
             dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
-            a = list(natnet.rigidBodyList[0])
+            a = list(rigidBodyList[0])
             b = []
             for element in a:
                 if type(element) is tuple:
@@ -77,9 +93,16 @@ def receiveRigidBodyList(rigidBodyList, stamp):
         timestamp[i] = stamp
 
 
+# natnet = NatNetClient(
+#     server=args.server,
+#     rigidBodyListListener=receiveRigidBodyList,
+#     dataPort=args.data_port,
+#     commandPort=args.command_port,
+#     verbose=args.verbose)
+
 natnet = NatNetClient(
     server=args.server,
-    rigidBodyListListener=receiveRigidBodyList,
+    rigidBodyListListener=storeOptiTrackData,
     dataPort=args.data_port,
     commandPort=args.command_port,
     verbose=args.verbose)
@@ -90,7 +113,7 @@ try:
     # This will run perpetually, and operate on a separate thread.
     natnet.run()
     sleep(0.1)
-    storeOptiTrackData()
+    #storeOptiTrackData()
 except (KeyboardInterrupt, SystemExit):
     print("Shutting down natnet interfaces...")
     natnet.stop()
