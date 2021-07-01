@@ -8,11 +8,12 @@ from UsefulFunction import tail, SmartProbeVect, WindVect, TrackClass, VisuClass
 
 class app_1(QtWidgets.QMainWindow):
     def __init__(self):
+        self.counter = 0
         super(app_1, self).__init__()
         self.timer = QtCore.QTimer()
         self.Track = TrackClass()
-        self.GPR = GPRClass()
         self.Visu = VisuClass()
+        self.GPR = GPRClass(espace=self.Visu.Points)
         uic.loadUi('config/interfacefinal.ui', self)
         self.setWindowTitle('Test GL app')
         self.ButtonConnection()
@@ -87,6 +88,14 @@ class app_1(QtWidgets.QMainWindow):
         smartprobeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
         mainPos = OptiData[1:4]
         quat = OptiData[4:8]
+        self.Track.TrackStorage(mainPos, WindVect(quat, smartprobeData))
+        self.GPR.setDataForGPR(self.Track.wholeTrack, self.Track.wholeWindTrack)
+        # if self.counter % 500 == 0:
+        self.GPR.predictWindGPR()
+        print(self.Visu.windDistribution(self.GPR.Yx_pred, self.GPR.Yy_pred, self.GPR.Yz_pred))
+
+        # TODO : Afficher les vecteurs dans le champs !
+
         # mainPos = np.array(tail('Data/OptiTrackData.csv', 1)[0][1:4])
         # quat = np.array(tail('Data/OptiTrackData.csv', 1)[0][4:8])
         # SPP2prim = SmartProbeVect(quat)

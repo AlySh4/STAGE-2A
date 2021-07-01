@@ -8,18 +8,22 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 class TrackClass:
     def __init__(self, length=1000):
         self.length = length
-        self.list = deque()
+        self.recentTrack = deque()  # le sillage uniquement
+        self.wholeTrack = np.empty((0, 3))  # tout depuis le début de la simulation
+        self.wholeWindTrack = np.empty((0, 3))
 
-    def TrackStorage(self, position):
-        if len(self.list) < self.length:
-            self.list.append(position)
+    def TrackStorage(self, position, Wind):
+        if len(self.recentTrack) < self.length:
+            self.recentTrack.append(position)
         else:
-            self.list.popleft()
-            self.list.append(position)
+            self.recentTrack.popleft()
+            self.recentTrack.append(position)
+        self.wholeTrack = np.concatenate((self.wholeTrack, position.reshape(1, 3)))
+        self.wholeWindTrack = np.concatenate((self.wholeWindTrack, (np.array(Wind)).reshape(1, 3)))
 
 
 class VisuClass:
-    def __init__(self, resolution=21, cote=10):
+    def __init__(self, resolution=11, cote=10):
         self.resolution = resolution
         self.cote = cote
         self.matrice = [[[0] * self.resolution] * self.resolution] * self.resolution
@@ -36,21 +40,26 @@ class VisuClass:
                     P.append((x, y, z))
         return np.array(P)
 
+    def windDistribution(self, X, Y, Z):
+        A = np.array((X, Y, Z)).T
+        return A + self.Points
+
 
 class GPRClass:
-    def __init__(self, l=0.1, sigma_f=1):
+    def __init__(self, l=0.1, sigma_f=1, espace=None):
         self.l = l
         self.sigma_f = sigma_f
         self.kernelx = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
                        * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        self.kernely = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
-                       * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        self.kernelz = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
-                       * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        self.kernel = self.kernelx * self.kernely * self.kernelz
-        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
-        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
-        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
+        # self.kernely = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
+        #                * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
+        # self.kernelz = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
+        #                * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
+        # self.kernel = self.kernelx * self.kernely * self.kernelz
+        self.kernel = self.kernelx
+        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=3, )
+        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=3, )
+        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=3, )
         self.Xm = None  # Points sur lequels le GPR va être appliqué
         self.Yx = None  # Les coordonnées du vents pour les points sur lequels on fait le training
         self.Yy = None
@@ -58,23 +67,21 @@ class GPRClass:
         self.Yx_pred = None  # Les coordonnées du vents prédits par le GPR
         self.Yy_pred = None
         self.Yz_pred = None
+        self.espace = espace
 
-    def setDataForGPR(self, pos, Yx, Yy, Yz):  # fonction qui permet de récuperer les data pour faire le training
+    def setDataForGPR(self, pos, wind):  # fonction qui permet de récuperer les data pour faire le training
         self.Xm = pos
-        self.Yx = Yx
-        self.Yy = Yy
-        self.Yz = Yz
+        self.Yx = wind[:, 0]
+        self.Yy = wind[:, 1]
+        self.Yz = wind[:, 2]
 
-    def runGPR(self):
+    def predictWindGPR(self):
         self.gp1.fit(self.Xm, self.Yx)
         self.gp2.fit(self.Xm, self.Yy)
         self.gp3.fit(self.Xm, self.Yz)
-
-    def predictWindGPR(self):
-        self.Yx_pred = self.gp1.predict(self.Xm)
-        self.Yy_pred = self.gp2.predict(self.Xm)
-        self.Yz_pred = self.gp3.predict(self.Xm)
-        return self.Yx_pred, self.Yy_pred, self.Yz_pred
+        self.Yx_pred = self.gp1.predict(self.espace)
+        self.Yy_pred = self.gp2.predict(self.espace)
+        self.Yz_pred = self.gp3.predict(self.espace)
 
 
 def tail(fn, n):
