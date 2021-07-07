@@ -1,5 +1,8 @@
+import sys
+import time
+from collections import deque
 from time import sleep
-from multiprocessing import Process
+
 import pyqtgraph.opengl as gl
 import numpy as np
 from pyqtgraph import Vector
@@ -7,13 +10,13 @@ from pyqtgraph.Qt import QtCore, QtWidgets
 from PyQt5 import uic
 from UsefulFunction import tail, SmartProbeVect, WindVect, TrackClass, VisuClass, GPRClass
 
-# def work(foo):
-#     foo.work()
-#
-# pool.apply_async(work,args=(foo,))
 Track = TrackClass()
 Visu = VisuClass()
 GPR = GPRClass(espace=Visu.Points)
+OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
+smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
+mainPos = OptiData[1:4]
+quaternion = OptiData[4:8]
 
 
 class app_1(QtWidgets.QMainWindow):
@@ -25,23 +28,41 @@ class app_1(QtWidgets.QMainWindow):
         self.axis()
         self.WallsAndGround()
         self.WindVect()
-        self.quadrillageView()
+        self.WindDistributionView()
+        # self.quadrillageView()
         self.SmartProbeView()
         # self.secondaryView.getPlotItem().hideAxis('bottom')
         # self.secondaryView.getPlotItem().hideAxis('left')
         self.updateTimer()
+        # self.updateTimer1()
         self.ComputeThreadCall()
+        self.AcquisitionThreadCall()
+        self.WindDistributionThreadCall()
+
+    def WindDistributionThreadCall(self):
+        self.WindDistributionThread = QtCore.QThread()
+        self.worker3 = computeWindDistributionThread()
+        self.worker3.moveToThread(self.WindDistributionThread)
+        self.WindDistributionThread.started.connect(self.worker3.run)
+        self.WindDistributionThread.start()
 
     def ComputeThreadCall(self):
         self.computeThread = QtCore.QThread()
-        self.worker = computeThread()
-        self.worker.moveToThread(self.computeThread)
-        self.computeThread.started.connect(self.worker.run)
+        self.worker1 = computeThread()
+        self.worker1.moveToThread(self.computeThread)
+        self.computeThread.started.connect(self.worker1.run)
         self.computeThread.start()
 
-    def quadrillageView(self):
-        quadrillage = gl.GLScatterPlotItem(pos=Visu.Points, size=2)
-        self.mainView.addItem(quadrillage)
+    def AcquisitionThreadCall(self):
+        self.aquisitionThread = QtCore.QThread()
+        self.worker2 = AcquisitionThread()
+        self.worker2.moveToThread(self.aquisitionThread)
+        self.aquisitionThread.started.connect(self.worker2.run)
+        self.aquisitionThread.start()
+
+    # def quadrillageView(self):
+    #     quadrillage = gl.GLScatterPlotItem(pos=Visu.Points, size=2)
+    #     self.mainView.addItem(quadrillage)
 
     def SmartProbeView(self):
         self.SmartProbe = gl.GLLinePlotItem(width=1, antialias=False)
@@ -51,11 +72,16 @@ class app_1(QtWidgets.QMainWindow):
         self.Trackplot = gl.GLLinePlotItem(width=1, antialias=False)
         self.mainView.addItem(self.Trackplot)
 
-    def FieldWindVectView(self):
-        self.WindVectList = []
-        for i in range((self.Visu.resolution) ** 3):
-            self.WindVectList.append(gl.GLLinePlotItem(width=0.5, antialias=False))
-            self.mainView.additem(self.WindVectList[i])
+    def WindDistributionView(self):
+        # self.WindDistributionList = deque()
+        # for i in range(Visu.resolution ** 3):
+        #     self.WindDistributionList.append(gl.GLLinePlotItem(width=0.5, color=(0, 255, 0, 1), antialias=False))
+        #     self.mainView.addItem(self.WindDistributionList[i])
+
+        for i in range(Visu.resolution ** 3):
+            exec("self.WindDistribution{} = gl.GLLinePlotItem(width=0.5, color=(0, 255, 0, 1), antialias=False)".format(
+                i))
+            exec("self.mainView.addItem(self.WindDistribution{})".format(i))
 
     def WindVect(self):
         self.WindVectDot = gl.GLScatterPlotItem(size=15, color=(1, 0, 0, 1))
@@ -76,16 +102,16 @@ class app_1(QtWidgets.QMainWindow):
         self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=30, azimuth=45, distance=10)
 
     def WallsAndGround(self):
-        ground = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
-        Wall1 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
-        Wall2 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
-        Wall1.rotate(90, 0, 1, 0)
-        Wall2.rotate(90, 1, 0, 0)
-        Wall1.translate(-5, 0, 5)
-        Wall2.translate(0, -5, 5)
+        ground = gl.GLGridItem(size=Vector(10, 10, 0), antialias=False)
+        # Wall1 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
+        # Wall2 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
+        # Wall1.rotate(90, 0, 1, 0)
+        # Wall2.rotate(90, 1, 0, 0)
+        # Wall1.translate(-5, 0, 5)
+        # Wall2.translate(0, -5, 5)
         self.mainView.addItem(ground)
-        self.mainView.addItem(Wall1)
-        self.mainView.addItem(Wall2)
+        # self.mainView.addItem(Wall1)
+        # self.mainView.addItem(Wall2)
 
     def ButtonConnection(self):
         self.xOyPButton.clicked.connect(self.xOyView)
@@ -101,41 +127,27 @@ class app_1(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update)
         self.timer.start()
 
-    def CalculTraitement(self):
-        while True:
-            OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
-            smartprobeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
-            mainPos = OptiData[1:4]
-            quat = OptiData[4:8]
-            self.Track.TrackStorage(mainPos, WindVect(quat, smartprobeData))
-            self.GPR.setDataForGPR(self.Track.wholeTrack, self.Track.wholeWindTrack)
-
-    def aquisitionData(self):
-        pass
+    # def updateTimer1(self):
+    #     self.timer1 = QtCore.QTimer()
+    #     self.timer1.timeout.connect(self.update1)
+    #     self.timer1.start(3000)
+    #
+    # def update1(self):
+    #     for i in range(Visu.resolution ** 3):
+    #         self.WindDistributionList[i].setData(
+    #             pos=np.array([Visu.Points[i], Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred)[i]]))
 
     def update(self):
-        """Il s'agit de la fonction callback de thread principal de Qt"""
-
-        """Il s'agit de la partie d'aqcisition de la Data"""
-        OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
-        smartprobeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
-        mainPos = OptiData[1:4]
-        quat = OptiData[4:8]
-        ############################################################
-        # TODO : Afficher les vecteurs dans le champs !
-
-        # for i in range((self.Visu.resolution)**3):
-        #    self.WindVectList[i].setData(mainPos)
         ############################################################
         """Il s'agit de la partie SmartProbe"""
-        SPP2prim = SmartProbeVect(quat)
+        SPP2prim = SmartProbeVect(quaternion)
         SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
         SPpos = np.array([mainPos, SPP2])
         self.SmartProbe.setData(pos=SPpos)
 
         ############################################################
         """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
-        WindP2prim = WindVect(quat, smartprobeData)
+        WindP2prim = WindVect(quaternion, smartProbeData)
         WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
         Windpos = np.array([mainPos, WindP2])
         self.Wind.setData(pos=Windpos)
@@ -144,10 +156,10 @@ class app_1(QtWidgets.QMainWindow):
         self.WindVectDot.setData(pos=WindDotpos)
         ############################################################
         """Il s'agit de la partie position temps reel"""
-        self.SpeedLCDNumber.display(smartprobeData[0])
-        self.angleofattackLCDNumber.display(np.degrees(smartprobeData[2]))
-        self.pitchangleLCDNumber.display(np.degrees(smartprobeData[2]))
-        self.sideslipLCDNumber.display(np.degrees(smartprobeData[3]))
+        self.SpeedLCDNumber.display(smartProbeData[0])
+        self.angleofattackLCDNumber.display(np.degrees(smartProbeData[2]))
+        self.pitchangleLCDNumber.display(np.degrees(smartProbeData[2]))
+        self.sideslipLCDNumber.display(np.degrees(smartProbeData[3]))
         self.xyzPosition.setText("<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
                                  % (mainPos[0], mainPos[1], mainPos[2]))
         ############################################################
@@ -157,17 +169,66 @@ class app_1(QtWidgets.QMainWindow):
         # self.Trackplot.setData(pos=np.array(Track.recentTrack))
 
 
+class AcquisitionThread(QtCore.QObject):
+    def __init__(self):
+        super(AcquisitionThread, self).__init__()
+
+    def run(self):
+        global OptiData, smartProbeData, mainPos, quaternion
+        while True:
+            try:
+                OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
+                smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
+                mainPos = OptiData[1:4]
+                quaternion = OptiData[4:8]
+                Track.TrackStorage(mainPos, WindVect(quaternion, smartProbeData))
+            except IndexError:
+                continue
+
+
 class computeThread(QtCore.QObject):
     def __init__(self):
         super(computeThread, self).__init__()
 
     def run(self):
         while True:
-            OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
-            smartprobeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
-            mainPos = OptiData[1:4]
-            quat = OptiData[4:8]
-            Track.TrackStorage(mainPos, WindVect(quat, smartprobeData))
-            GPR.setDataForGPR(Track.wholeTrack, Track.wholeWindTrack)
-            GPR.predictWindGPR()
-            print(Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred))
+            try:
+                GPR.setDataForGPR(Track.wholeTrack, Track.wholeWindTrack)
+                GPR.predictWindGPR()
+            # print(Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred))
+            except ValueError:
+                continue
+
+
+class computeWindDistributionThread(QtCore.QObject):
+    def __init__(self):
+        super(computeWindDistributionThread, self).__init__()
+
+    # def run(self):
+    #     while True:
+    #         start = time.time()
+    #         try:
+    #             for i in range(Visu.resolution ** 3):
+    #                 wid.WindDistributionList[i].setData(
+    #                     pos=np.array([Visu.Points[i], Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred)[i]]))
+    #         except TypeError:
+    #             continue
+    #         end = time.time()
+    #         print(end-start)
+
+    def run(self):
+        while True:
+            try:
+                for i in range(Visu.resolution ** 3):
+                    exec(
+                        "wid.WindDistribution{}.setData(pos=np.array([Visu.Points[i], Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred)[i]]))".format(
+                            i))
+            except TypeError:
+                continue
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    wid = app_1()
+    wid.show()
+    sys.exit(app.exec_())

@@ -51,46 +51,46 @@ track = dict([(ac_id, deque()) for ac_id in id_dict.keys()])
 #             f.flush()
 #             sleep(period)
 
+
 def storeOptiTrackData(rigidBodyList, stamp):  # TODO : ajouter le lien avec le rigidbody_id
-    while True:
-        with open('Data/OptiTrackData.csv', 'w', newline='') as f:
-            dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
-            a = list(rigidBodyList[0])
-            b = []
-            for element in a:
-                if type(element) is tuple:
-                    for i in element:
-                        b.append(i)
-                else:
-                    b.append(element)
-            dataWriter.writerow(b)
-            f.flush()
-            sleep(period)
+    with open('Data/OptiTrackData.csv', 'w', newline='') as f:
+        dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
+        a = list(rigidBodyList[0])
+        b = []
+        for element in a:
+            if type(element) is tuple:
+                for i in element:
+                    b.append(i)
+            else:
+                b.append(element)
+        dataWriter.writerow(b)
+        f.flush()
+        sleep(period)
 
 
-def store_track(ac_id, pos, t):
-    if ac_id in id_dict.keys():
-        track[ac_id].append((pos, t))
-        if len(track[ac_id]) > args.vel_samples:
-            track[ac_id].popleft()
+# def store_track(ac_id, pos, t):
+#     if ac_id in id_dict.keys():
+#         track[ac_id].append((pos, t))
+#         if len(track[ac_id]) > args.vel_samples:
+#             track[ac_id].popleft()
 
 
-def receiveRigidBodyList(rigidBodyList, stamp):
-    for (ac_id, pos, quat, valid) in rigidBodyList:
-        if not valid:
-            # skip if rigid body is not valid
-            continue
-
-        i = str(ac_id)
-        if i not in id_dict.keys():
-            continue
-
-        store_track(i, pos, stamp)
-        if timestamp[i] is None or abs(stamp - timestamp[i]) < period:
-            if timestamp[i] is None:
-                timestamp[i] = stamp
-            continue  # too early for next message
-        timestamp[i] = stamp
+# def receiveRigidBodyList(rigidBodyList, stamp):
+#     for (ac_id, pos, quat, valid) in rigidBodyList:
+#         if not valid:
+#             # skip if rigid body is not valid
+#             continue
+#
+#         i = str(ac_id)
+#         if i not in id_dict.keys():
+#             continue
+#
+#         store_track(i, pos, stamp)
+#         if timestamp[i] is None or abs(stamp - timestamp[i]) < period:
+#             if timestamp[i] is None:
+#                 timestamp[i] = stamp
+#             continue  # too early for next message
+#         timestamp[i] = stamp
 
 
 # natnet = NatNetClient(
@@ -113,7 +113,7 @@ try:
     # This will run perpetually, and operate on a separate thread.
     natnet.run()
     sleep(0.1)
-    #storeOptiTrackData()
+    # storeOptiTrackData()
 except (KeyboardInterrupt, SystemExit):
     print("Shutting down natnet interfaces...")
     natnet.stop()

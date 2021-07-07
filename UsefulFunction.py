@@ -5,6 +5,9 @@ from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 
+# x1, x2, y1, y2, z1, z2 = -3, -3, -4, -7, 0, 2
+
+
 class TrackClass:
     def __init__(self, length=1000):
         self.length = length
@@ -23,10 +26,9 @@ class TrackClass:
 
 
 class VisuClass:
-    def __init__(self, resolution=11, cote=10):
+    def __init__(self, resolution=5, cote=2):
         self.resolution = resolution
         self.cote = cote
-        self.matrice = [[[0] * self.resolution] * self.resolution] * self.resolution
         self.X = np.linspace(-cote / 2, cote / 2, self.resolution)
         self.Y = np.linspace(-cote / 2, cote / 2, self.resolution)
         self.Z = np.linspace(0, cote, self.resolution)
@@ -45,17 +47,12 @@ class VisuClass:
         return A + self.Points
 
 
-class GPRClass:
+class GPRClass:  # TODO: Verifier la fonction de covariance
     def __init__(self, l=0.1, sigma_f=1, espace=None):
         self.l = l
         self.sigma_f = sigma_f
         self.kernelx = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
                        * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        # self.kernely = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
-        #                * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        # self.kernelz = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
-        #                * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        # self.kernel = self.kernelx * self.kernely * self.kernelz
         self.kernel = self.kernelx
         self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=3, )
         self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=3, )
@@ -70,10 +67,17 @@ class GPRClass:
         self.espace = espace
 
     def setDataForGPR(self, pos, wind):  # fonction qui permet de récuperer les data pour faire le training
-        self.Xm = pos
-        self.Yx = wind[:, 0]
-        self.Yy = wind[:, 1]
-        self.Yz = wind[:, 2]
+
+        if len(pos) > 200 and len(wind) > 200:
+            self.Xm = pos[-300:]
+            self.Yx = wind[:, 0][-300:]
+            self.Yy = wind[:, 1][-300:]
+            self.Yz = wind[:, 2][-300:]
+        else:
+            self.Xm = pos
+            self.Yx = wind[:, 0]
+            self.Yy = wind[:, 1]
+            self.Yz = wind[:, 2]
 
     def predictWindGPR(self):
         self.gp1.fit(self.Xm, self.Yx)
@@ -92,7 +96,6 @@ def tail(fn, n):
 
 def SmartProbeVect(quat):
     vect = [0.5, 0, 0]  # vecteur dans le repère mouvant
-    # quat = np.array(tail('Data/OptiTrackData.csv', 1)[0][4:8])
     rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
     return rotation.apply(vect)
 
@@ -104,8 +107,3 @@ def WindVect(quat, SPData):
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
     return rotation.apply(vect)
-
-
-def alphaBetaGlobal(v):
-    pass
-    # TODO: effectuer cela demain.
