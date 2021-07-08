@@ -26,7 +26,7 @@ class TrackClass:
 
 
 class VisuClass:
-    def __init__(self, resolution=5, cote=2):
+    def __init__(self, resolution=10, cote=1):
         self.resolution = resolution
         self.cote = cote
         self.X = np.linspace(-cote / 2, cote / 2, self.resolution)

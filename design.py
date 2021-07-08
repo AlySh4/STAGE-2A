@@ -78,10 +78,16 @@ class app_1(QtWidgets.QMainWindow):
         #     self.WindDistributionList.append(gl.GLLinePlotItem(width=0.5, color=(0, 255, 0, 1), antialias=False))
         #     self.mainView.addItem(self.WindDistributionList[i])
 
-        for i in range(Visu.resolution ** 3):
-            exec("self.WindDistribution{} = gl.GLLinePlotItem(width=0.5, color=(0, 255, 0, 1), antialias=False)".format(
-                i))
-            exec("self.mainView.addItem(self.WindDistribution{})".format(i))
+        # for i in range(Visu.resolution ** 3):
+        #     exec("self.WindDistribution{} = gl.GLLinePlotItem(width=0.5, color=(0, 255, 0, 1), antialias=False)".format(
+        #         i))
+        #     exec("self.mainView.addItem(self.WindDistribution{})".format(i))
+
+        # self.WindDistribution = gl.GLScatterPlotItem(color=(0, 255, 0, 1), size = 5)
+        # self.mainView.addItem(self.WindDistribution)
+
+        self.WindDistribution = gl.GLLinePlotItem(color=(0, 255, 0, 1), width=0.5, mode='lines')
+        self.mainView.addItem(self.WindDistribution)
 
     def WindVect(self):
         self.WindVectDot = gl.GLScatterPlotItem(size=15, color=(1, 0, 0, 1))
@@ -216,13 +222,37 @@ class computeWindDistributionThread(QtCore.QObject):
     #         end = time.time()
     #         print(end-start)
 
+    # def run(self):
+    #     while True:
+    #         try:
+    #             for i in range(Visu.resolution ** 3):
+    #                 exec(
+    #                     "wid.WindDistribution{}.setData(pos=np.array([Visu.Points[i], Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred)[i]]))".format(
+    #                         i))
+    #         except TypeError:
+    #             continue
+
+    # def run(self):
+    #     while True:
+    #         try:
+    #             bj = np.empty((0,3))
+    #             for i in range(Visu.resolution ** 3):
+    #                 a = Visu.Points[i]
+    #                 b = Visu.windDistribution(GPR.Yx_pred/10, GPR.Yy_pred/10, GPR.Yz_pred/10)[i]
+    #                 bj = np.concatenate((bj, a.reshape((1,3)), (np.array([(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2])).reshape((1,3)), b.reshape((1,3))))
+    #             wid.WindDistribution.setData(pos=bj)
+    #         except TypeError:
+    #             continue
+
     def run(self):
         while True:
             try:
+                pos = np.empty((0, 3))
                 for i in range(Visu.resolution ** 3):
-                    exec(
-                        "wid.WindDistribution{}.setData(pos=np.array([Visu.Points[i], Visu.windDistribution(GPR.Yx_pred, GPR.Yy_pred, GPR.Yz_pred)[i]]))".format(
-                            i))
+                    a = Visu.Points[i]
+                    b = Visu.windDistribution(GPR.Yx_pred / 10, GPR.Yy_pred / 10, GPR.Yz_pred / 10)[i]
+                    pos = np.concatenate((pos, a.reshape((1, 3)), b.reshape(1, 3)))
+                wid.WindDistribution.setData(pos=pos)
             except TypeError:
                 continue
 
