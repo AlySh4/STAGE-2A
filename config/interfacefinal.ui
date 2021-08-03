@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1158</width>
-    <height>669</height>
+    <width>1071</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,35 +27,14 @@
     <property name="bottomMargin">
      <number>20</number>
     </property>
-    <item row="2" column="0">
-     <layout class="QGridLayout" name="bottomLayout">
-      <item row="1" column="1">
-       <widget class="QPushButton" name="resetButton">
-        <property name="text">
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="recordButton">
-        <property name="text">
-         <string>Record</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="saveButton">
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,3,1,0" columnminimumwidth="0,0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="0,0,2,1,0"
+             columnminimumwidth="0,0,0,0,0">
       <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
+      <property name="spacing">
+       <number>6</number>
       </property>
       <item row="0" column="2">
        <widget class="GLViewWidget" name="mainView">
@@ -73,13 +52,65 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <layout class="QGridLayout" name="leftVLayout">
+        <item row="5" column="0">
+         <widget class="QPushButton" name="yOzPButton">
+          <property name="text">
+           <string>yOz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="resetPButton">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="xOzPButton">
+          <property name="text">
+           <string>xOz</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <spacer name="leftVLayoutSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="xOyPButton">
+          <property name="text">
+           <string>xOy</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QPushButton" name="GPRShowingButton">
+          <property name="text">
+           <string>GPR View</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="0" column="3" colspan="2">
-       <layout class="QVBoxLayout" name="rightVLayout" stretch="0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="rightVLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
         <property name="spacing">
          <number>6</number>
         </property>
         <property name="sizeConstraint">
-         <enum>QLayout::SetFixedSize</enum>
+         <enum>QLayout::SetMaximumSize</enum>
         </property>
         <property name="topMargin">
          <number>0</number>
@@ -107,11 +138,18 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;x=&lt;/p&gt;&lt;p&gt;y=&lt;/p&gt;&lt;p&gt;z=&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="speedHLayout">
@@ -131,28 +169,24 @@
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="SpeedLCDNumber">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QLabel" name="SpeedLabelValue">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;TextLabel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             </string>
             </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
-            <property name="lineWidth">
-             <number>5</number>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="angleofattackHLayout" stretch="0,0">
@@ -169,31 +203,23 @@
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="angleofattackLCDNumber">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QLabel" name="angleofattackLabelValue">
+            <property name="text">
+             <string>TextLabel</string>
             </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
-            <property name="lineWidth">
-             <number>3</number>
-            </property>
-            <property name="smallDecimalPoint">
-             <bool>false</bool>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="pitchangleHLayout">
@@ -210,22 +236,23 @@
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="pitchangleLCDNumber">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+           <widget class="QLabel" name="pitchangleLabelValue">
+            <property name="text">
+             <string>TextLabel</string>
             </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
-            <property name="lineWidth">
-             <number>3</number>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="sidesleepHLayout">
@@ -245,22 +272,23 @@
            </widget>
           </item>
           <item>
-           <widget class="QLCDNumber" name="sideslipLCDNumber">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+           <widget class="QLabel" name="sideslipeLabelValue">
+            <property name="text">
+             <string>TextLabel</string>
             </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
-            <property name="lineWidth">
-             <number>3</number>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QTabWidget" name="verticalTabWidget">
@@ -299,14 +327,18 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QSlider" name="slideryOz">
+               <widget class="QSlider" name="sliderXcut">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="SByOz"/>
+               <widget class="QLabel" name="labelXcut">
+                <property name="text">
+                 <string>x = 0.0</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -325,14 +357,18 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
-                 <widget class="QSlider" name="sliderxOz">
+                 <widget class="QSlider" name="sliderYcut">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="SBxOz"/>
+                 <widget class="QLabel" name="labelYcut">
+                  <property name="text">
+                   <string>y = 0.0</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -353,14 +389,18 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
-                 <widget class="QSlider" name="sliderxOy">
+                 <widget class="QSlider" name="sliderZcut">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="SBxOy"/>
+                 <widget class="QLabel" name="labelZcut">
+                  <property name="text">
+                   <string>z = 0.0</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -370,50 +410,39 @@
           </widget>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item row="0" column="1">
-       <layout class="QGridLayout" name="leftVLayout">
-        <item row="7" column="0">
-         <spacer name="leftVLayoutSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="xOyPButton">
-          <property name="text">
-           <string>xOy</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QPushButton" name="yOzPButton">
-          <property name="text">
-           <string>yOz</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QPushButton" name="xOzPButton">
-          <property name="text">
-           <string>xOz</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="resetPButton">
-          <property name="text">
-           <string>Reset</string>
-          </property>
-         </widget>
+        <item>
+         <layout class="QGridLayout" name="bottomLayout">
+          <item row="1" column="1">
+           <widget class="QPushButton" name="resetButton">
+            <property name="text">
+             <string>Reset</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="saveButton">
+            <property name="text">
+             <string>Save</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="GPRstatut">
+            <property name="text">
+             <string>Start GPR</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -426,7 +455,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1158</width>
+     <width>1071</width>
      <height>21</height>
     </rect>
    </property>

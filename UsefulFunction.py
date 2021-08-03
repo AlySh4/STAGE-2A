@@ -1,6 +1,6 @@
 from collections import deque
 import numpy as np
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as Rot
 from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 from sklearn.gaussian_process import GaussianProcessRegressor
 
@@ -8,7 +8,6 @@ import pprzlink.serial
 import pprzlink.messages_xml_map as messages_xml_map
 import pprzlink.message as message
 import time
-import csv
 
 
 class TrackClass:
@@ -29,7 +28,7 @@ class TrackClass:
 
 
 class VisuClass:
-    def __init__(self, d=5, x1=-2, x2=1, y1=-5, y2=1, z1=0, z2=1):
+    def __init__(self, d=5, x1=0, x2=1, y1=0, y2=2, z1=0, z2=1):
         self.d = d
         self.x1 = x1
         self.x2 = x2
@@ -40,6 +39,7 @@ class VisuClass:
         self.resX = int(abs(x2 - x1) * d)
         self.resY = int(abs(y2 - y1) * d)
         self.resZ = int(abs(z2 - z1) * d)
+        print(self.resX, self.resY, self.resZ)
         self.nbpoint = self.resX * self.resY * self.resZ
         self.X = np.linspace(x1, x2, self.resX)
         self.Y = np.linspace(y1, y2, self.resY)
@@ -51,6 +51,9 @@ class VisuClass:
                               [0] * (self.resX * self.resZ), axis=1)
         self.Zcut = np.insert(np.transpose([np.tile(self.X, self.resY), np.repeat(self.Y, self.resX)]), 2,
                               [0] * (self.resX * self.resY), axis=1)
+        self.xcuut = 0
+        self.ycuut = 0
+        self.zcuut = 0
 
     def ListePoints(self):
         P = []
@@ -60,13 +63,21 @@ class VisuClass:
                     P.append((x, y, z))
         return np.array(P)
 
-    def setCut(self, componante, cut):
-        if componante == 'x':
+    def setCut(self, component, cut):
+        if component == 'x':
             self.Xcut[:, 0] = [cut] * (self.resY * self.resZ)
-        if componante == 'y':
+        if component == 'y':
             self.Ycut[:, 1] = [cut] * (self.resX * self.resZ)
-        if componante == 'z':
-            self.Ycut[:, 2] = [cut] * (self.resX * self.resY)
+        if component == 'z':
+            self.Zcut[:, 2] = [cut] * (self.resX * self.resY)
+
+    def newsetCut(self, component, cut):
+        if component == 'x':
+            self.xcuut = cut
+        if component == 'y':
+            self.ycuut = cut
+        if component == 'z':
+            self.zcuut = cut
 
     def windDistribution(self, X, Y, Z):
         A = np.array((X, Y, Z)).T
@@ -80,9 +91,9 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.kernelx = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
                        * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
         self.kernel = self.kernelx
-        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
-        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
-        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
+        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
+        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
+        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
         self.Xm = None  # Points sur lequels le GPR va être appliqué
         self.Yx = None  # Les coordonnées du vents pour les points sur lequels on fait le training
         self.Yy = None
@@ -116,10 +127,24 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.Yy_pred = self.gp2.predict(self.espace)
         self.Yz_pred = self.gp3.predict(self.espace)
 
-    def predictWindSecViewGPR(self, Xcut, Ycut, Zcut):
-        self.Xcut_pred = self.gp1.predict(Xcut)
-        self.Ycut_pred = self.gp2.predict(Ycut)
-        self.Zcut_pred = self.gp3.predict(Zcut)
+    def WindSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
+        if component == 'x' or component == 'all':
+            self.Xcut_pred = self.Yx_pred[Xcut * (resY * resZ):(Xcut + 1) * (resY * resZ)]
+        if component == 'y' or component == 'all':
+            P = np.array([])
+            for j in range(resX):
+                P = np.concatenate(
+                    (P, self.Yy_pred[Ycut * resZ + j * (resZ * resY):(Ycut + 1) * resZ + j * (resZ * resY)]),
+                    axis=None)
+            self.Ycut_pred = P
+        if component == 'z' or component == 'all':
+            self.Zcut_pred = self.Yz_pred[Zcut::resZ]
+
+    # def predictWindSecViewGPR(self, Xcut, Ycut, Zcut):
+    #     self.Xcut_pred = self.gp1.predict(Xcut)
+    #     self.Ycut_pred = self.gp2.predict(Ycut)
+    #     self.Zcut_pred = self.gp3.predict(Zcut)
+
 
 def tail(fn, n):
     with open(fn, 'r') as f:
@@ -128,29 +153,59 @@ def tail(fn, n):
 
 
 def SmartProbeVect(quat):
-    vect = [0.5, 0, 0]  # vecteur dans le repère mouvant
-    rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
+    vect = [0, -0.5, 0]  # vecteur dans le repère mouvant
+    rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
 
 
 def WindVect(quat, SPData):
-    # pour quat np.array(tail('Data/OptiTrackData.csv', 1)[0][4:8]) et SPData = np.array(tail(
-    # 'Data/SmartProbeData.csv', 1)[0]) est necessaire
     vect = [np.cos(SPData[3]), np.sin(SPData[3]), np.sin(SPData[2]), ]  # vecteur du vent dans le repère mouvant
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
-    rotation = R.from_quat([quat[3], quat[0], quat[1], quat[2]])
+    rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
 
 
-def GetOptiTrackData(list, rb_id):
-    for (ac_id, pos, quat, valid) in list:
-        if not valid:
-            # skip if rigid body is not valid
-            continue
+def GetOptiTrackData(lalist, rb_id):
+    for (ac_id, pos, quat, valid) in lalist:
+        # if not valid:
+        #     # skip if rigid body is not valid
+        #     continue
         if ac_id == rb_id:
             return np.array(pos), np.array(quat)
         else:
             continue
+
+
+def convert_to_alpha(v1, v2):
+    v1y = np.dot(v1, np.array([0, 1, 0]))
+    v1z = np.dot(v1, np.array([0, 0, 1]))
+    v2y = np.dot(v2, np.array([0, 1, 0]))
+    v2z = np.dot(v2, np.array([0, 0, 1]))
+    np.seterr(divide='ignore', invalid='ignore')
+    vect1 = [v1y, v1z] / np.linalg.norm([v1y, v1z])
+    vect2 = [v2y, v2z] / np.linalg.norm([v2y, v2z])
+    return np.degrees(np.arccos(np.dot(vect1, vect2)))
+
+
+def convert_to_beta(v1, v2):
+    v1x = np.dot(v1, np.array([1, 0, 0]))
+    v1y = np.dot(v1, np.array([0, 1, 0]))
+    v2x = np.dot(v2, np.array([1, 0, 0]))
+    v2y = np.dot(v2, np.array([0, 1, 0]))
+    np.seterr(divide='ignore', invalid='ignore')
+    vect1 = [v1x, v1y] / np.linalg.norm([v1x, v1y])
+    vect2 = [v2x, v2y] / np.linalg.norm([v2x, v2y])
+    return np.degrees(np.arccos(np.dot(vect1, vect2)))
+
+
+def pitch_angle(v1):
+    v1x = np.dot(v1, np.array([1, 0, 0]))
+    v1z = np.dot(v1, np.array([0, 0, 1]))
+    np.seterr(divide='ignore', invalid='ignore')
+    vect1 = [v1x, v1z] / np.linalg.norm([v1x, v1z])
+    vect2 = [1, 0] / np.linalg.norm([1, 0])
+    # np.seterr(divide='ignore', invalid='ignore')
+    return np.degrees(np.arccos(np.dot(vect1, vect2)))
 
 
 class SerialTutorial:
@@ -208,9 +263,3 @@ class SerialTutorial:
         #     dataWriter = csv.writer(f)
         #     dataWriter.writerow([TAS, EAS, alpha, beta])
         #     f.flush()
-
-# class SecondaryView():
-#     def __init__(self):
-#     self.graphX=
-#     self.graphY=
-#     self.graphZ=
