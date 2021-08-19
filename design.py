@@ -1,17 +1,20 @@
 import sys
 from time import sleep
 import pyqtgraph.opengl as gl
+import matplotlib.pyplot as plt
 import numpy as np
-from pyqtgraph import Vector, ImageItem, HistogramLUTItem
-# from pyqtgraph.graphicsItems import ColorBarItem
+from PyQt5.QtWidgets import QVBoxLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from pyqtgraph import Vector, ImageItem, HistogramLUTItem, glColor
+from pyqtgraph.graphicsItems import ColorBarItem
 from pyqtgraph.Qt import QtCore, QtWidgets, QtGui
 from PyQt5 import uic
 from OriginalTemplates.NatNetClient import NatNetClient
 from UsefulFunction import tail, SmartProbeVect, WindVect, TrackClass, VisuClass, GPRClass, GetOptiTrackData, \
-    SerialTutorial, convert_to_alpha, convert_to_beta, pitch_angle
+    SerialTutorial, convert_to_alpha, convert_to_beta, pitch_angle, fonctionvent, VarianceToColor
 
 dev = 0  # 0, 1 ou 2
-
 Track = TrackClass()
 Visu = VisuClass()
 GPR = GPRClass(espace=Visu.Points)
@@ -19,7 +22,7 @@ GPR = GPRClass(espace=Visu.Points)
 
 class app_1(QtWidgets.QMainWindow):
     def __init__(self, SPid=224, dp=1511, cp=1510, server="192.168.1.235"):
-
+        self.c = 0
         if dev == 0:
             pass
 
@@ -41,7 +44,7 @@ class app_1(QtWidgets.QMainWindow):
 
         super(app_1, self).__init__()
         self.SPid = SPid
-        uic.loadUi('config/interfacefinal.ui', self)
+        uic.loadUi('config/interfacefinal1.ui', self)
         self.setWindowTitle('Test GL app')
         self.ButtonConnection()
         self.ButtonStatusInit()
@@ -53,6 +56,7 @@ class app_1(QtWidgets.QMainWindow):
 
         self.updateTimer()
         # self.TrackView()
+        # self.secondaryViewplot()
         self.secondaryViewplot()
 
     def ButtonStatusInit(self):
@@ -96,13 +100,35 @@ class app_1(QtWidgets.QMainWindow):
             self.GPRstatut.setStyleSheet("background-color: green")
             self.GPRstatut.setText("Start GRP")
 
-    def secondaryViewplot(self):
-        self.Xview = ImageItem()
-        self.Yview = ImageItem()
-        self.Zview = ImageItem()
+    # def secondaryViewplotVariance(self):
+    #     self.XviewVar = MatplotlibWidget()
+    #     self.YviewVar = MatplotlibWidget()
+    #     self.ZviewVar = MatplotlibWidget()
 
-        bar = HistogramLUTItem(image=self.Xview)
-        self.Xplotview.addItem(bar)
+    def secondaryViewplot(self):
+        self.Xview = MatplotlibWidget()
+        self.Yview = MatplotlibWidget()
+        self.Zview = MatplotlibWidget()
+
+        # self.a = self.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'))
+        self.Ximg = self.Xview.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                           vmax=1, interpolation='bilinear')
+        self.Yimg = self.Yview.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                           vmax=1, interpolation='bilinear')
+        self.Zimg = self.Zview.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                           vmax=1, interpolation='bilinear')
+
+        self.XimgColorbar = self.Xview.figure.colorbar(self.Ximg)
+        self.YimgColorbar = self.Yview.figure.colorbar(self.Yimg)
+        self.ZimgColorbar = self.Zview.figure.colorbar(self.Zimg)
+
+        self.layoutXview = QVBoxLayout(self.Xplotview)
+        self.layoutYview = QVBoxLayout(self.Yplotview)
+        self.layoutZview = QVBoxLayout(self.Zplotview)
+
+        self.layoutXview.addWidget(self.Xview)
+        self.layoutYview.addWidget(self.Yview)
+        self.layoutZview.addWidget(self.Zview)
 
         self.sliderXcut.setRange(0, Visu.resX - 1)
         self.sliderYcut.setRange(0, Visu.resY - 1)
@@ -117,7 +143,11 @@ class app_1(QtWidgets.QMainWindow):
                 self.labelXcut.setText("<html><head/><body><p>x = %0.1f</p></body></html>" % Visu.X[value])
                 Visu.newsetCut('x', value)
                 GPR.WindSecViewGPR('x', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
-                wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 2))
+                # wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 2))
+                # wid.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)),cmap=plt.get_cmap('RdYlGn'))
+                wid.Ximg.set_data(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)))
+                wid.Ximg.set_clim(vmin=min(GPR.Xcut_pred), vmax=max(GPR.Xcut_pred))
+                wid.Xview.canvas.draw_idle()
 
         def changeValueY(value):
             if self.counter:
@@ -128,7 +158,11 @@ class app_1(QtWidgets.QMainWindow):
                 self.labelYcut.setText("<html><head/><body><p>y = %0.1f</p></body></html>" % Visu.Y[value])
                 Visu.newsetCut('y', value)
                 GPR.WindSecViewGPR('y', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
-                wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 2))
+                # wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 2))
+                # wid.Yview.axis.imshow(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)),cmap=plt.get_cmap('RdYlGn'))
+                wid.Yimg.set_data(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)))
+                wid.Yimg.set_clim(vmin=min(GPR.Ycut_pred), vmax=max(GPR.Ycut_pred))
+                wid.Yview.canvas.draw_idle()
 
         def changeValueZ(value):
             if self.counter:
@@ -139,22 +173,15 @@ class app_1(QtWidgets.QMainWindow):
                 self.labelZcut.setText("<html><head/><body><p>z = %0.1f</p></body></html>" % Visu.Z[value])
                 Visu.newsetCut('z', value)
                 GPR.WindSecViewGPR('z', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
-                wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 2))
+                # wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 2))
+                # wid.Zview.axis.imshow(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)),cmap=plt.get_cmap('RdYlGn'), vmin=-20, vmax=20)
+                wid.Zimg.set_data(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)))
+                wid.Zimg.set_clim(vmin=min(GPR.Zcut_pred), vmax=max(GPR.Zcut_pred))
+                wid.Zview.canvas.draw_idle()
 
         self.sliderZcut.valueChanged.connect(changeValueZ)
         self.sliderXcut.valueChanged.connect(changeValueX)
         self.sliderYcut.valueChanged.connect(changeValueY)
-
-        # self.Xplotview.getPlotItem().hideAxis('bottom')
-        # self.Xplotview.getPlotItem().hideAxis('left')
-        # self.Yplotview.getPlotItem().hideAxis('bottom')
-        # self.Yplotview.getPlotItem().hideAxis('left')
-        # self.Zplotview.getPlotItem().hideAxis('bottom')
-        # self.Zplotview.getPlotItem().hideAxis('left')
-
-        self.Xplotview.addItem(self.Xview)
-        self.Yplotview.addItem(self.Yview)
-        self.Zplotview.addItem(self.Zview)
 
     def SmartProbeView(self):
         self.SmartProbe = gl.GLLinePlotItem(width=1, antialias=False)
@@ -249,17 +276,17 @@ class app_1(QtWidgets.QMainWindow):
             SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
 
             SPpos = np.array([mainPos, SPP2])
-            self.SmartProbe.setData(pos=SPpos)
+            # self.SmartProbe.setData(pos=SPpos)
 
-            ############################################################
+            # ############################################################
             """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
             WindP2prim = WindVect(quaternion, smartProbeData)
             WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
             Windpos = np.array([mainPos, WindP2])
-            self.Wind.setData(pos=Windpos)
+            # self.Wind.setData(pos=Windpos)
 
             WindDotpos = np.array([WindP2])
-            self.WindVectDot.setData(pos=WindDotpos)
+            # self.WindVectDot.setData(pos=WindDotpos)
             ############################################################
             """Il s'agit de la partie position temps reel"""
             self.xyzPosition.setText("<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
@@ -294,10 +321,47 @@ class computeThread(QtCore.QObject):
             try:
 
                 if dev == 0:
-                    OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
+                    L = np.array(tail('testdata.csv', 1000))
+                    OptiData = L[wid.c]
+                    wid.c += 1
+                    # OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
                     smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
                     mainPos = OptiData[1:4]
                     quaternion = OptiData[4:8]
+
+                    """Il s'agit de la partie SmartProbe"""
+                    SPP2prim = SmartProbeVect(quaternion)
+                    SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
+
+                    SPpos = np.array([mainPos, SPP2])
+                    wid.SmartProbe.setData(pos=SPpos)
+
+                    ############################################################
+                    """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+                    # WindP2prim = WindVect(quaternion, smartProbeData)
+                    WindP2prim = fonctionvent(mainPos[0], mainPos[1], mainPos[2])
+                    WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+                    Windpos = np.array([mainPos, WindP2])
+                    wid.Wind.setData(pos=Windpos)
+
+                    WindDotpos = np.array([WindP2])
+                    wid.WindVectDot.setData(pos=WindDotpos)
+
+                    """Il s'agit de la partie position temps reel"""
+                    wid.xyzPosition.setText(
+                        "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+                        % (mainPos[0], mainPos[1], mainPos[2]))
+                    wid.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                    # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                    wid.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                    # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+                    wid.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                    wid.angleofattackLabelValue.setText(
+                        "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+                    wid.pitchangleLabelValue.setText(
+                        "<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+                    wid.sideslipeLabelValue.setText(
+                        "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
                 if dev == 1:
                     OptiData = GetOptiTrackData(self.natnet.rigidBodyList, wid.SPid)
@@ -311,26 +375,55 @@ class computeThread(QtCore.QObject):
                     mainPos = OptiData[0]
                     quaternion = OptiData[1]
 
-                Track.TrackStorage(mainPos, WindVect(quaternion, smartProbeData))
+                Track.TrackStorage(mainPos, WindP2prim)
                 GPR.setDataForGPR(Track.wholeTrack, Track.wholeWindTrack)
                 GPR.predictWindGPR()
                 pos = np.empty((0, 3))
+                color = np.empty((0, 4))
                 a = Visu.Points
                 b = Visu.windDistribution(GPR.Yx_pred / 2, GPR.Yy_pred / 2, GPR.Yz_pred / 2)
+
                 for i in range(Visu.nbpoint):
                     pos = np.concatenate((pos, a[i].reshape((1, 3)), b[i].reshape(1, 3)))
-                wid.WindDistribution.setData(pos=pos)
-                # GPR.predictWindSecViewGPR(Visu.Xcut, Visu.Ycut, Visu.Zcut)
+                    var = GPR.Variance(i)
+                    col = np.array(glColor(VarianceToColor(var)))
+                    color = np.concatenate((color, col.reshape(1, 4), col.reshape(1, 4)))
+                    # print (var)
+
+                wid.WindDistribution.setData(pos=pos, color=color)
                 GPR.WindSecViewGPR('all', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
-                wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 2))
-                wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 2))
-                wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 2))
-                sleep(1)
+                # wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 10))
+                # wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 10))
+                # wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 10))
+                # wid.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'))
+                # wid.Yview.axis.imshow(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'))
+                # wid.Zview.axis.imshow(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'))
+                wid.Ximg.set_data(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)))
+                wid.Yimg.set_data(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)))
+                wid.Zimg.set_data(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)))
+                wid.Ximg.set_clim(vmin=min(GPR.Xcut_pred), vmax=max(GPR.Xcut_pred))
+                wid.Yimg.set_clim(vmin=min(GPR.Ycut_pred), vmax=max(GPR.Ycut_pred))
+                wid.Zimg.set_clim(vmin=min(GPR.Zcut_pred), vmax=max(GPR.Zcut_pred))
+                wid.Xview.canvas.draw_idle()
+                wid.Yview.canvas.draw_idle()
+                wid.Zview.canvas.draw_idle()
+                # wid.YimgColorbar.clim(vmin=min(GPR.Ycut_pred), vmax=max(GPR.Ycut_pred))
             except (NameError, TypeError):
                 continue
 
     def stop(self):
         self.isRunning = False
+
+
+class MatplotlibWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super(MatplotlibWidget, self).__init__()
+        self.figure = Figure()
+        self.canvas = FigureCanvasQTAgg(self.figure)
+        self.axis = self.figure.add_subplot(111)
+
+        self.layoutvertical = QVBoxLayout(self)
+        self.layoutvertical.addWidget(self.canvas)
 
 
 if __name__ == '__main__':  # TODO: parser pour parametrer le natnet.

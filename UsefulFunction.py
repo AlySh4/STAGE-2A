@@ -1,3 +1,4 @@
+import colorsys
 from collections import deque
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot
@@ -28,7 +29,7 @@ class TrackClass:
 
 
 class VisuClass:
-    def __init__(self, d=5, x1=0, x2=1, y1=0, y2=2, z1=0, z2=1):
+    def __init__(self, d=3, x1=0, x2=1, y1=-2, y2=2, z1=-2, z2=2):
         self.d = d
         self.x1 = x1
         self.x2 = x2
@@ -39,7 +40,7 @@ class VisuClass:
         self.resX = int(abs(x2 - x1) * d)
         self.resY = int(abs(y2 - y1) * d)
         self.resZ = int(abs(z2 - z1) * d)
-        print(self.resX, self.resY, self.resZ)
+        # print(self.resX, self.resY, self.resZ)
         self.nbpoint = self.resX * self.resY * self.resZ
         self.X = np.linspace(x1, x2, self.resX)
         self.Y = np.linspace(y1, y2, self.resY)
@@ -88,12 +89,16 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
     def __init__(self, l=0.1, sigma_f=1, espace=None):
         self.l = l
         self.sigma_f = sigma_f
-        self.kernelx = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
-                       * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
-        self.kernel = self.kernelx
-        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
-        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
-        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=20, )
+        self.kernel = ConstantKernel(constant_value=self.sigma_f, constant_value_bounds=(1e-2, 1e2)) \
+                      * RBF(length_scale=self.l, length_scale_bounds=(1e-2, 1e2))
+
+        # incertitude
+        self.variance = self.kernel
+        ###
+
+        self.gp1 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
+        self.gp2 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
+        self.gp3 = GaussianProcessRegressor(kernel=self.kernel, alpha=self.sigma_f ** 2, n_restarts_optimizer=10, )
         self.Xm = None  # Points sur lequels le GPR va être appliqué
         self.Yx = None  # Les coordonnées du vents pour les points sur lequels on fait le training
         self.Yy = None
@@ -105,27 +110,36 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.Ycut_pred = None
         self.Zcut_pred = None
         self.espace = espace
+        self.varianceX = None
+        self.varianceY = None
+        self.varianceZ = None
 
     def setDataForGPR(self, pos, wind):  # fonction qui permet de récuperer les data pour faire le training
 
-        # if len(pos) > 500 and len(wind) > 500:
-        #     self.Xm = pos[-500:]
-        #     self.Yx = wind[:, 0][-500:]
-        #     self.Yy = wind[:, 1][-500:]
-        #     self.Yz = wind[:, 2][-500:]
-        # else:
-        self.Xm = pos
-        self.Yx = wind[:, 0]
-        self.Yy = wind[:, 1]
-        self.Yz = wind[:, 2]
+        if len(pos) > 30 and len(wind) > 30:
+            self.Xm = pos[-30:]
+            self.Yx = wind[:, 0][-30:]
+            self.Yy = wind[:, 1][-30:]
+            self.Yz = wind[:, 2][-30:]
+        else:
+            self.Xm = pos
+            self.Yx = wind[:, 0]
+            self.Yy = wind[:, 1]
+            self.Yz = wind[:, 2]
 
     def predictWindGPR(self):
         self.gp1.fit(self.Xm, self.Yx)
         self.gp2.fit(self.Xm, self.Yy)
         self.gp3.fit(self.Xm, self.Yz)
-        self.Yx_pred = self.gp1.predict(self.espace)
-        self.Yy_pred = self.gp2.predict(self.espace)
-        self.Yz_pred = self.gp3.predict(self.espace)
+        self.Yx_pred, covx = self.gp1.predict(self.espace, return_cov=True)
+        self.Yy_pred, covy = self.gp2.predict(self.espace, return_cov=True)
+        self.Yz_pred, covz = self.gp3.predict(self.espace, return_cov=True)
+        self.varianceX = np.diagonal(covx)
+        self.varianceY = np.diagonal(covy)
+        self.varianceZ = np.diagonal(covz)
+
+    def Variance(self, i):
+        return max(self.varianceX[i], self.varianceY[i], self.varianceZ[i])
 
     def WindSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
         if component == 'x' or component == 'all':
@@ -149,6 +163,7 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
 def tail(fn, n):
     with open(fn, 'r') as f:
         lines = f.readlines()
+        # print (lines)
     return [list(map(eval, line.strip().split(','))) for line in lines[-n:]]
 
 
@@ -159,7 +174,7 @@ def SmartProbeVect(quat):
 
 
 def WindVect(quat, SPData):
-    vect = [np.cos(SPData[3]), np.sin(SPData[3]), np.sin(SPData[2]), ]  # vecteur du vent dans le repère mouvant
+    vect = [np.cos(SPData[2]), np.sin(SPData[2]), np.sin(SPData[3]), ]  # vecteur du vent dans le repère mouvant
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
@@ -263,3 +278,18 @@ class SerialTutorial:
         #     dataWriter = csv.writer(f)
         #     dataWriter.writerow([TAS, EAS, alpha, beta])
         #     f.flush()
+
+
+def fonctionvent(X, Y, Z):
+    u = 1 - X
+    v = -Y * (1 - X)
+    w = -Z
+
+    return np.array([u, v, w])
+
+
+def VarianceToColor(variance):
+    a = 0
+    b = 0.4
+    rgb = colorsys.hsv_to_rgb((b - variance) / (3 * (b - a)), 1.0, 1.0)
+    return tuple([round(255 * x) for x in rgb])
