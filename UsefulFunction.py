@@ -56,6 +56,10 @@ class VisuClass:
         self.ycuut = 0
         self.zcuut = 0
 
+        self.xcuutVariance = 0
+        self.ycuutVariance = 0
+        self.zcuutVariance = 0
+
     def ListePoints(self):
         P = []
         for x in self.X:
@@ -64,14 +68,6 @@ class VisuClass:
                     P.append((x, y, z))
         return np.array(P)
 
-    def setCut(self, component, cut):
-        if component == 'x':
-            self.Xcut[:, 0] = [cut] * (self.resY * self.resZ)
-        if component == 'y':
-            self.Ycut[:, 1] = [cut] * (self.resX * self.resZ)
-        if component == 'z':
-            self.Zcut[:, 2] = [cut] * (self.resX * self.resY)
-
     def newsetCut(self, component, cut):
         if component == 'x':
             self.xcuut = cut
@@ -79,6 +75,14 @@ class VisuClass:
             self.ycuut = cut
         if component == 'z':
             self.zcuut = cut
+
+    def newsetCutVariance(self, component, cut):
+        if component == 'x':
+            self.xcuutVariance = cut
+        if component == 'y':
+            self.ycuutVariance = cut
+        if component == 'z':
+            self.zcuutVariance = cut
 
     def windDistribution(self, X, Y, Z):
         A = np.array((X, Y, Z)).T
@@ -109,6 +113,9 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.Xcut_pred = None
         self.Ycut_pred = None
         self.Zcut_pred = None
+        self.Xcut_predVariance = None
+        self.Ycut_predVariance = None
+        self.Zcut_predVariance = None
         self.espace = espace
         self.varianceX = None
         self.varianceY = None
@@ -140,6 +147,19 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
 
     def Variance(self, i):
         return max(self.varianceX[i], self.varianceY[i], self.varianceZ[i])
+
+    def VarianceSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
+        if component == 'x' or component == 'all':
+            self.Xcut_predVariance = self.varianceX[Xcut * (resY * resZ):(Xcut + 1) * (resY * resZ)]
+        if component == 'y' or component == 'all':
+            P = np.array([])
+            for j in range(resX):
+                P = np.concatenate(
+                    (P, self.varianceY[Ycut * resZ + j * (resZ * resY):(Ycut + 1) * resZ + j * (resZ * resY)]),
+                    axis=None)
+            self.Ycut_predVariance = P
+        if component == 'z' or component == 'all':
+            self.Zcut_predVariance = self.varianceZ[Zcut::resZ]
 
     def WindSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
         if component == 'x' or component == 'all':

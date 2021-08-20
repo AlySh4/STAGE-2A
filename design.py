@@ -58,6 +58,7 @@ class app_1(QtWidgets.QMainWindow):
         # self.TrackView()
         # self.secondaryViewplot()
         self.secondaryViewplot()
+        self.secondaryViewplotVariance()
 
     def ButtonStatusInit(self):
         self.stateGPRbutton = True
@@ -100,10 +101,71 @@ class app_1(QtWidgets.QMainWindow):
             self.GPRstatut.setStyleSheet("background-color: green")
             self.GPRstatut.setText("Start GRP")
 
-    # def secondaryViewplotVariance(self):
-    #     self.XviewVar = MatplotlibWidget()
-    #     self.YviewVar = MatplotlibWidget()
-    #     self.ZviewVar = MatplotlibWidget()
+    def secondaryViewplotVariance(self):
+        self.XviewVar = MatplotlibWidget()
+        self.YviewVar = MatplotlibWidget()
+        self.ZviewVar = MatplotlibWidget()
+
+        self.XimgVar = self.XviewVar.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                                 vmax=1, interpolation='bilinear')
+        self.YimgVar = self.YviewVar.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                                 vmax=1, interpolation='bilinear')
+        self.ZimgVar = self.ZviewVar.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+                                                 vmax=1, interpolation='bilinear')
+
+        self.XimgVarColorbar = self.XviewVar.figure.colorbar(self.XimgVar)
+        self.YimgVarColorbar = self.YviewVar.figure.colorbar(self.YimgVar)
+        self.ZimgVarColorbar = self.ZviewVar.figure.colorbar(self.ZimgVar)
+
+        self.layoutXviewVar = QVBoxLayout(self.XplotviewVariance)
+        self.layoutYviewVar = QVBoxLayout(self.YplotviewVariance)
+        self.layoutZviewVar = QVBoxLayout(self.ZplotviewVariance)
+
+        self.sliderXcutVariance.setRange(0, Visu.resX - 1)
+        self.sliderYcutVariance.setRange(0, Visu.resY - 1)
+        self.sliderZcutVariance.setRange(0, Visu.resZ - 1)
+
+        def changeValueXVar(value):
+            if self.counter:
+                self.labelXcutVariance.setText("<html><head/><body><p>x = %0.1f</p></body></html>" % Visu.X[value])
+                Visu.newsetCutVariance('x', value)
+                GPR.VarianceSecViewGPR('z', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuutVariance, Visu.ycuutVariance,
+                                       Visu.zcuutVariance)
+                # wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 2))
+                # wid.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)),cmap=plt.get_cmap('RdYlGn'))
+                wid.XimgVar.set_data(GPR.Xcut_predVariance.reshape((Visu.resY, Visu.resZ)))
+                wid.XimgVar.set_clim(vmin=min(GPR.Xcut_predVariance), vmax=max(GPR.Xcut_predVariance))
+                wid.XviewVar.canvas.draw_idle()
+
+        def changeValueYVar(value):
+            if self.counter:
+                self.labelYcutVariance.setText("<html><head/><body><p>y = %0.1f</p></body></html>" % Visu.Y[value])
+                Visu.newsetCutVariance('y', value)
+                # GPR.WindSecViewGPR('y', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
+                GPR.VarianceSecViewGPR('y', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuutVariance, Visu.ycuutVariance,
+                                       Visu.zcuutVariance)
+                # wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 2))
+                # wid.Yview.axis.imshow(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)),cmap=plt.get_cmap('RdYlGn'))
+                wid.YimgVar.set_data(GPR.Ycut_predVariance.reshape((Visu.resZ, Visu.resX)))
+                wid.YimgVar.set_clim(vmin=min(GPR.Ycut_predVariance), vmax=max(GPR.Ycut_predVariance))
+                wid.YviewVar.canvas.draw_idle()
+
+        def changeValueZVar(value):
+            if self.counter:
+                self.labelZcutVariance.setText("<html><head/><body><p>z = %0.1f</p></body></html>" % Visu.Z[value])
+                Visu.newsetCutVariance('z', value)
+                # GPR.WindSecViewGPR('z', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
+                GPR.VarianceSecViewGPR('z', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuutVariance, Visu.ycuutVariance,
+                                       Visu.zcuutVariance)
+                # wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 2))
+                # wid.Zview.axis.imshow(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)),cmap=plt.get_cmap('RdYlGn'), vmin=-20, vmax=20)
+                wid.ZimgVar.set_data(GPR.Zcut_predVariance.reshape((Visu.resX, Visu.resY)))
+                wid.ZimgVar.set_clim(vmin=min(GPR.Zcut_predVariance), vmax=max(GPR.Zcut_predVariance))
+                wid.ZviewVar.canvas.draw_idle()
+
+        self.sliderZcutVariance.valueChanged.connect(changeValueZVar)
+        self.sliderXcutVariance.valueChanged.connect(changeValueXVar)
+        self.sliderYcutVariance.valueChanged.connect(changeValueYVar)
 
     def secondaryViewplot(self):
         self.Xview = MatplotlibWidget()
@@ -391,13 +453,8 @@ class computeThread(QtCore.QObject):
                     # print (var)
 
                 wid.WindDistribution.setData(pos=pos, color=color)
+
                 GPR.WindSecViewGPR('all', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuut, Visu.ycuut, Visu.zcuut)
-                # wid.Xview.setImage(image=GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), levels=(0, 10))
-                # wid.Yview.setImage(image=GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), levels=(0, 10))
-                # wid.Zview.setImage(image=GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), levels=(0, 10))
-                # wid.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'))
-                # wid.Yview.axis.imshow(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'))
-                # wid.Zview.axis.imshow(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'))
                 wid.Ximg.set_data(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)))
                 wid.Yimg.set_data(GPR.Ycut_pred.reshape((Visu.resZ, Visu.resX)))
                 wid.Zimg.set_data(GPR.Zcut_pred.reshape((Visu.resX, Visu.resY)))
@@ -407,6 +464,18 @@ class computeThread(QtCore.QObject):
                 wid.Xview.canvas.draw_idle()
                 wid.Yview.canvas.draw_idle()
                 wid.Zview.canvas.draw_idle()
+
+                GPR.VarianceSecViewGPR('all', Visu.resX, Visu.resY, Visu.resZ, Visu.xcuutVariance, Visu.ycuutVariance,
+                                       Visu.zcuutVariance)
+                wid.XimgVar.set_data(GPR.Xcut_predVariance.reshape((Visu.resY, Visu.resZ)))
+                wid.YimgVar.set_data(GPR.Ycut_predVariance.reshape((Visu.resZ, Visu.resX)))
+                wid.ZimgVar.set_data(GPR.Zcut_predVariance.reshape((Visu.resX, Visu.resY)))
+                wid.XimgVar.set_clim(vmin=min(GPR.Xcut_predVariance), vmax=max(GPR.Xcut_predVariance))
+                wid.YimgVar.set_clim(vmin=min(GPR.Ycut_predVariance), vmax=max(GPR.Ycut_predVariance))
+                wid.ZimgVar.set_clim(vmin=min(GPR.Zcut_predVariance), vmax=max(GPR.Zcut_predVariance))
+                wid.XviewVar.canvas.draw_idle()
+                wid.YviewVar.canvas.draw_idle()
+                wid.ZviewVar.canvas.draw_idle()
                 # wid.YimgColorbar.clim(vmin=min(GPR.Ycut_pred), vmax=max(GPR.Ycut_pred))
             except (NameError, TypeError):
                 continue
