@@ -3,7 +3,7 @@ from time import sleep
 import pyqtgraph.opengl as gl
 import matplotlib.pyplot as plt
 import numpy as np
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QFormLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from pyqtgraph import Vector, ImageItem, HistogramLUTItem, glColor
@@ -19,10 +19,42 @@ Track = TrackClass()
 Visu = VisuClass()
 GPR = GPRClass(espace=Visu.Points)
 
+uifile_2 = 'config/configurationDialog.ui'
+form_2, base_2 = uic.loadUiType(uifile_2)
+
+
+class ConfigurationWindow(form_2, base_2):
+    def __init__(self):
+        super(base_2, self).__init__()
+        self.setupUi(self)
+        self.spinBoxX1.setValue(Visu.x1)
+        self.spinBoxX2.setValue(Visu.x2)
+        self.spinBoxY1.setValue(Visu.y1)
+        self.spinBoxY2.setValue(Visu.y2)
+        self.spinBoxZ1.setValue(Visu.z1)
+        self.spinBoxZ2.setValue(Visu.z2)
+        self.spinBoxRes.setValue(Visu.d)
+        self.buttonBox.accepted.connect(self.change)
+
+    def change(self):
+        if (self.spinBoxX1.value() < self.spinBoxX2.value()) and (self.spinBoxY1.value() < self.spinBoxY2.value()) and (
+                self.spinBoxZ1.value() < self.spinBoxZ2.value()) and self.spinBoxRes.value() > 0:
+            Visu.x1 = self.spinBoxX1.value()
+            Visu.x2 = self.spinBoxX2.value()
+            Visu.y1 = self.spinBoxY1.value()
+            Visu.y2 = self.spinBoxY2.value()
+            Visu.z1 = self.spinBoxZ1.value()
+            Visu.z2 = self.spinBoxZ2.value()
+            Visu.d = self.spinBobRes.value()
+            self.close()
+        else:
+            self.info.setText("Please verify your values")
+
 
 class app_1(QtWidgets.QMainWindow):
     def __init__(self, SPid=224, dp=1511, cp=1510, server="192.168.1.235"):
         self.c = 0
+        self.f = 0
         if dev == 0:
             pass
 
@@ -59,6 +91,15 @@ class app_1(QtWidgets.QMainWindow):
         # self.secondaryViewplot()
         self.secondaryViewplot()
         self.secondaryViewplotVariance()
+        self.tqt()
+
+    def tqt(self):
+        self.confwid = ConfigurationWindow()
+
+        def openconf():
+            self.confwid.show()
+
+        self.resetButton.clicked.connect(openconf)
 
     def ButtonStatusInit(self):
         self.stateGPRbutton = True
@@ -106,11 +147,14 @@ class app_1(QtWidgets.QMainWindow):
         self.YviewVar = MatplotlibWidget()
         self.ZviewVar = MatplotlibWidget()
 
-        self.XimgVar = self.XviewVar.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.XimgVar = self.XviewVar.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn_r'),
+                                                 vmin=0,
                                                  vmax=1, interpolation='bilinear')
-        self.YimgVar = self.YviewVar.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.YimgVar = self.YviewVar.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn_r'),
+                                                 vmin=0,
                                                  vmax=1, interpolation='bilinear')
-        self.ZimgVar = self.ZviewVar.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.ZimgVar = self.ZviewVar.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn_r'),
+                                                 vmin=0,
                                                  vmax=1, interpolation='bilinear')
 
         self.XimgVarColorbar = self.XviewVar.figure.colorbar(self.XimgVar)
@@ -120,6 +164,10 @@ class app_1(QtWidgets.QMainWindow):
         self.layoutXviewVar = QVBoxLayout(self.XplotviewVariance)
         self.layoutYviewVar = QVBoxLayout(self.YplotviewVariance)
         self.layoutZviewVar = QVBoxLayout(self.ZplotviewVariance)
+
+        self.layoutXviewVar.addWidget(self.XviewVar)
+        self.layoutYviewVar.addWidget(self.YviewVar)
+        self.layoutZviewVar.addWidget(self.ZviewVar)
 
         self.sliderXcutVariance.setRange(0, Visu.resX - 1)
         self.sliderYcutVariance.setRange(0, Visu.resY - 1)
@@ -173,11 +221,11 @@ class app_1(QtWidgets.QMainWindow):
         self.Zview = MatplotlibWidget()
 
         # self.a = self.Xview.axis.imshow(GPR.Xcut_pred.reshape((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'))
-        self.Ximg = self.Xview.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.Ximg = self.Xview.axis.imshow(np.zeros((Visu.resY, Visu.resZ)), cmap=plt.get_cmap('coolwarm'), vmin=0,
                                            vmax=1, interpolation='bilinear')
-        self.Yimg = self.Yview.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.Yimg = self.Yview.axis.imshow(np.zeros((Visu.resZ, Visu.resX)), cmap=plt.get_cmap('coolwarm'), vmin=0,
                                            vmax=1, interpolation='bilinear')
-        self.Zimg = self.Zview.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('RdYlGn'), vmin=0,
+        self.Zimg = self.Zview.axis.imshow(np.zeros((Visu.resX, Visu.resY)), cmap=plt.get_cmap('coolwarm'), vmin=0,
                                            vmax=1, interpolation='bilinear')
 
         self.XimgColorbar = self.Xview.figure.colorbar(self.Ximg)
@@ -309,6 +357,7 @@ class app_1(QtWidgets.QMainWindow):
 
     def updateTimer(self):
         self.timer = QtCore.QTimer()
+        self.timer.setInterval(50)
         self.timer.timeout.connect(self.update)
         self.timer.start()
 
@@ -320,11 +369,75 @@ class app_1(QtWidgets.QMainWindow):
                 mainPos = OptiData[1:4]
                 quaternion = OptiData[4:8]
 
+                """Il s'agit de la partie SmartProbe"""
+                SPP2prim = SmartProbeVect(quaternion)
+                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
+
+                SPpos = np.array([mainPos, SPP2])
+                # self.SmartProbe.setData(pos=SPpos)
+
+                # ############################################################
+                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+                WindP2prim = WindVect(quaternion, smartProbeData)
+                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+                Windpos = np.array([mainPos, WindP2])
+                # self.Wind.setData(pos=Windpos)
+
+                WindDotpos = np.array([WindP2])
+                # self.WindVectDot.setData(pos=WindDotpos)
+                ############################################################
+                """Il s'agit de la partie position temps reel"""
+                self.xyzPosition.setText(
+                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+                    % (mainPos[0], mainPos[1], mainPos[2]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                self.angleofattackLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+                self.sideslipeLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+
             if dev == 1:
                 OptiData = GetOptiTrackData(self.natnet.rigidBodyList, wid.SPid)
                 smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
                 mainPos = OptiData[0]
                 quaternion = OptiData[1]
+
+                """Il s'agit de la partie SmartProbe"""
+                SPP2prim = SmartProbeVect(quaternion)
+                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
+
+                SPpos = np.array([mainPos, SPP2])
+                self.SmartProbe.setData(pos=SPpos)
+
+                # ############################################################
+                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+                WindP2prim = WindVect(quaternion, smartProbeData)
+                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+                Windpos = np.array([mainPos, WindP2])
+                self.Wind.setData(pos=Windpos)
+
+                WindDotpos = np.array([WindP2])
+                self.WindVectDot.setData(pos=WindDotpos)
+                ############################################################
+                """Il s'agit de la partie position temps reel"""
+                self.xyzPosition.setText(
+                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+                    % (mainPos[0], mainPos[1], mainPos[2]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                self.angleofattackLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+                self.sideslipeLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
             if dev == 2:
                 OptiData = GetOptiTrackData(self.natnet.rigidBodyList, wid.SPid)
@@ -332,37 +445,69 @@ class app_1(QtWidgets.QMainWindow):
                 mainPos = OptiData[0]
                 quaternion = OptiData[1]
 
-            ############################################################
-            """Il s'agit de la partie SmartProbe"""
-            SPP2prim = SmartProbeVect(quaternion)
-            SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
+                """Il s'agit de la partie SmartProbe"""
+                SPP2prim = SmartProbeVect(quaternion)
+                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
 
-            SPpos = np.array([mainPos, SPP2])
-            # self.SmartProbe.setData(pos=SPpos)
+                SPpos = np.array([mainPos, SPP2])
+                self.SmartProbe.setData(pos=SPpos)
+
+                # ############################################################
+                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+                WindP2prim = WindVect(quaternion, smartProbeData)
+                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+                Windpos = np.array([mainPos, WindP2])
+                self.Wind.setData(pos=Windpos)
+
+                WindDotpos = np.array([WindP2])
+                self.WindVectDot.setData(pos=WindDotpos)
+                ############################################################
+                """Il s'agit de la partie position temps reel"""
+                self.xyzPosition.setText(
+                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+                    % (mainPos[0], mainPos[1], mainPos[2]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+                self.angleofattackLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+                self.sideslipeLabelValue.setText(
+                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
             # ############################################################
-            """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
-            WindP2prim = WindVect(quaternion, smartProbeData)
-            WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-            Windpos = np.array([mainPos, WindP2])
+            # """Il s'agit de la partie SmartProbe"""
+            # SPP2prim = SmartProbeVect(quaternion)
+            # SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
+            #
+            # SPpos = np.array([mainPos, SPP2])
+            # self.SmartProbe.setData(pos=SPpos)
+            #
+            # # ############################################################
+            # """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+            # WindP2prim = WindVect(quaternion, smartProbeData)
+            # WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+            # Windpos = np.array([mainPos, WindP2])
             # self.Wind.setData(pos=Windpos)
-
-            WindDotpos = np.array([WindP2])
+            #
+            # WindDotpos = np.array([WindP2])
             # self.WindVectDot.setData(pos=WindDotpos)
-            ############################################################
-            """Il s'agit de la partie position temps reel"""
-            self.xyzPosition.setText("<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-                                     % (mainPos[0], mainPos[1], mainPos[2]))
-            self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-            # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-            self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-            # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-            self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-            self.angleofattackLabelValue.setText(
-                "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-            self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-            self.sideslipeLabelValue.setText(
-                "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+            # ############################################################
+            # """Il s'agit de la partie position temps reel"""
+            # self.xyzPosition.setText("<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+            #                          % (mainPos[0], mainPos[1], mainPos[2]))
+            # self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+            # # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+            # self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+            # # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+            # self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+            # self.angleofattackLabelValue.setText(
+            #     "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+            # self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+            # self.sideslipeLabelValue.setText(
+            #     "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
             ############################################################
 
@@ -425,19 +570,22 @@ class computeThread(QtCore.QObject):
                     wid.sideslipeLabelValue.setText(
                         "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
+                    Track.TrackStorage(mainPos, WindP2prim)
+
                 if dev == 1:
-                    OptiData = GetOptiTrackData(self.natnet.rigidBodyList, wid.SPid)
+                    OptiData = GetOptiTrackData(wid.natnet.rigidBodyList, wid.SPid)
                     smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
                     mainPos = OptiData[0]
                     quaternion = OptiData[1]
+                    Track.TrackStorage(mainPos, WindVect(quaternion, smartProbeData))
 
                 if dev == 2:
-                    OptiData = GetOptiTrackData(self.natnet.rigidBodyList, wid.SPid)
-                    smartProbeData = self.serial.smartprobeData
+                    OptiData = GetOptiTrackData(wid.natnet.rigidBodyList, wid.SPid)
+                    smartProbeData = wid.serial.smartprobeData
                     mainPos = OptiData[0]
                     quaternion = OptiData[1]
+                    Track.TrackStorage(mainPos, WindVect(quaternion, smartProbeData))
 
-                Track.TrackStorage(mainPos, WindP2prim)
                 GPR.setDataForGPR(Track.wholeTrack, Track.wholeWindTrack)
                 GPR.predictWindGPR()
                 pos = np.empty((0, 3))
@@ -450,7 +598,6 @@ class computeThread(QtCore.QObject):
                     var = GPR.Variance(i)
                     col = np.array(glColor(VarianceToColor(var)))
                     color = np.concatenate((color, col.reshape(1, 4), col.reshape(1, 4)))
-                    # print (var)
 
                 wid.WindDistribution.setData(pos=pos, color=color)
 

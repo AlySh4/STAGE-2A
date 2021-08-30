@@ -15,14 +15,14 @@ ax1 = fig.add_subplot(projection="3d")
 ax1.set_xlabel('x')
 ax1.set_ylabel('y')
 ax1.set_zlabel('z')
-ax1.set_xlim(0, 1)
-ax1.set_ylim(-1, 1)
+ax1.set_xlim(-1, 1)
+ax1.set_ylim(0, 1)
 ax1.set_zlim(-1, 1)
 
 
 def animate(t):
-    x = 1 / 2 * np.sin(t / 10) + 1 / 2
-    y = np.cos(t)
+    x = np.cos(t)
+    y = 1 / 2 * np.sin(t / 10) + 1 / 2
     z = np.sin(t)
     ax1.scatter(x, y, z)
     f = open('testdata.csv', 'a')

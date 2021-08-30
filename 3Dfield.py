@@ -67,12 +67,20 @@ import pyqtgraph as pg
 ################uniquement pour la visualisation
 fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
-X, Y, Z = np.meshgrid(np.arange(0, 1, 0.2),
-                      np.arange(-2, 2, 0.2),
-                      np.arange(-2, 2, 0.2))
+X, Y, Z = np.meshgrid(np.arange(0, 1, 0.3),
+                      np.arange(-2, 2, 0.3),
+                      np.arange(-2, 2, 0.3))
 
-u = 1 - X
-v = -Y * (1 - X)
+X, Y, Z = np.meshgrid(np.arange(-1, 1, 0.2),
+                      np.arange(0, 1, 0.2),
+                      np.arange(-1, 1, 0.5))
+
+# u = 1 - X
+# v = -Y*(1 - X)
+# w = -Z
+
+u = -X * (1 - Y)
+v = -(1 - Y)
 w = -Z
 
 ax.quiver(X, Y, Z, u, v, w, length=0.1, normalize=True)

@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>970</width>
+                <height>564</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>MainWindow</string>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QGridLayout" name="gridLayout_2">
+                <property name="leftMargin">
+                    <number>20</number>
+                </property>
+                <property name="topMargin">
+                    <number>20</number>
+                </property>
+                <property name="rightMargin">
+                    <number>20</number>
+                </property>
+                <property name="bottomMargin">
+                    <number>20</number>
+                </property>
+                <item row="0" column="0">
+                    <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="0,0,2,1,0"
+                            columnminimumwidth="0,0,0,0,0">
+                        <property name="sizeConstraint">
+                            <enum>QLayout::SetMaximumSize</enum>
+                        </property>
+                        <property name="spacing">
+                            <number>6</number>
+                        </property>
+                        <item row="0" column="2">
+                            <widget class="GLViewWidget" name="mainView">
+                                <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                        <horstretch>1</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>0</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="0" column="1">
+                            <layout class="QGridLayout" name="leftVLayout">
+                                <item row="8" column="0">
+                                    <widget class="QPushButton" name="GPRShowingButton">
+                                        <property name="text">
+                                            <string>GPR View</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="1" column="0">
+                                    <widget class="QPushButton" name="resetPButton">
+                                        <property name="text">
+                                            <string>Reset</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="5" column="0">
+                                    <widget class="QPushButton" name="yOzPButton">
+                                        <property name="text">
+                                            <string>yOz</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="0">
+                                    <widget class="QPushButton" name="xOzPButton">
+                                        <property name="text">
+                                            <string>xOz</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="2" column="0">
+                                    <widget class="QPushButton" name="xOyPButton">
+                                        <property name="text">
+                                            <string>xOy</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="6" column="0">
+                                    <spacer name="leftVLayoutSpacer">
+                                        <property name="orientation">
+                                            <enum>Qt::Vertical</enum>
+                                        </property>
+                                        <property name="sizeHint" stdset="0">
+                                            <size>
+                                                <width>20</width>
+                                                <height>40</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </item>
+                                <item row="7" column="0">
+                                    <widget class="QPushButton" name="resetButton">
+                                        <property name="text">
+                                            <string>Configuration GPR</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </item>
+                        <item row="0" column="3" colspan="2">
+                            <layout class="QVBoxLayout" name="rightVLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+                                <property name="spacing">
+                                    <number>6</number>
+                                </property>
+                                <property name="sizeConstraint">
+                                    <enum>QLayout::SetMaximumSize</enum>
+                                </property>
+                                <property name="topMargin">
+                                    <number>0</number>
+                                </property>
+                                <property name="bottomMargin">
+                                    <number>0</number>
+                                </property>
+                                <item>
+                                    <layout class="QHBoxLayout" name="horizontalLayout">
+                                        <property name="sizeConstraint">
+                                            <enum>QLayout::SetMinimumSize</enum>
+                                        </property>
+                                        <item>
+                                            <widget class="QLabel" name="label">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+                                                        style=&quot; font-size:10pt;&quot;&gt;SmartProbe
+                                                        &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;
+                                                        font-size:10pt;&quot;&gt;Head Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QLabel" name="xyzPosition">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;x=&lt;/p&gt;&lt;p&gt;y=&lt;/p&gt;&lt;p&gt;z=&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item>
+                                    <widget class="Line" name="line">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <layout class="QHBoxLayout" name="speedHLayout">
+                                        <property name="sizeConstraint">
+                                            <enum>QLayout::SetMinimumSize</enum>
+                                        </property>
+                                        <item>
+                                            <widget class="QLabel" name="speedLabel">
+                                                <property name="mouseTracking">
+                                                    <bool>true</bool>
+                                                </property>
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+                                                        style=&quot; font-size:10pt;&quot;&gt;TAS
+                                                        (m/s)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QLabel" name="SpeedLabelValue">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;TextLabel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item>
+                                    <widget class="Line" name="line_2">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <layout class="QHBoxLayout" name="angleofattackHLayout" stretch="0,0">
+                                        <property name="sizeConstraint">
+                                            <enum>QLayout::SetMinimumSize</enum>
+                                        </property>
+                                        <item>
+                                            <widget class="QLabel" name="angleofattackLabel">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+                                                        style=&quot; font-size:10pt;&quot;&gt;Angle
+                                                        of Attack (°)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QLabel" name="angleofattackLabelValue">
+                                                <property name="text">
+                                                    <string>TextLabel</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item>
+                                    <widget class="Line" name="line_3">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <layout class="QHBoxLayout" name="pitchangleHLayout">
+                                        <property name="sizeConstraint">
+                                            <enum>QLayout::SetMinimumSize</enum>
+                                        </property>
+                                        <item>
+                                            <widget class="QLabel" name="pitchangleLabel">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+                                                        style=&quot; font-size:10pt;&quot;&gt;Pitch
+                                                        Angle (°)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QLabel" name="pitchangleLabelValue">
+                                                <property name="text">
+                                                    <string>TextLabel</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item>
+                                    <widget class="Line" name="line_4">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <layout class="QHBoxLayout" name="sidesleepHLayout">
+                                        <property name="spacing">
+                                            <number>6</number>
+                                        </property>
+                                        <property name="sizeConstraint">
+                                            <enum>QLayout::SetMinimumSize</enum>
+                                        </property>
+                                        <item>
+                                            <widget class="QLabel" name="sideslipeLabel">
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+                                                        style=&quot; font-size:10pt;&quot;&gt;Dérapage
+                                                        (°)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                                    </string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item>
+                                            <widget class="QLabel" name="sideslipeLabelValue">
+                                                <property name="text">
+                                                    <string>TextLabel</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item>
+                                    <widget class="Line" name="line_5">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <widget class="QTabWidget" name="tabWidget">
+                                        <property name="currentIndex">
+                                            <number>0</number>
+                                        </property>
+                                        <widget class="QWidget" name="tab_3">
+                                            <attribute name="title">
+                                                <string>Plan de Coupe</string>
+                                            </attribute>
+                                            <layout class="QHBoxLayout" name="horizontalLayout_6">
+                                                <item>
+                                                    <layout class="QHBoxLayout" name="horizontalLayout_5">
+                                                        <item>
+                                                            <widget class="QTabWidget" name="TabWidgetCut">
+                                                                <property name="sizePolicy">
+                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                vsizetype="Expanding">
+                                                                        <horstretch>0</horstretch>
+                                                                        <verstretch>0</verstretch>
+                                                                    </sizepolicy>
+                                                                </property>
+                                                                <property name="tabShape">
+                                                                    <enum>QTabWidget::Rounded</enum>
+                                                                </property>
+                                                                <property name="currentIndex">
+                                                                    <number>0</number>
+                                                                </property>
+                                                                <widget class="QWidget" name="yOz">
+                                                                    <property name="sizePolicy">
+                                                                        <sizepolicy hsizetype="Preferred"
+                                                                                    vsizetype="Ignored">
+                                                                            <horstretch>0</horstretch>
+                                                                            <verstretch>0</verstretch>
+                                                                        </sizepolicy>
+                                                                    </property>
+                                                                    <property name="minimumSize">
+                                                                        <size>
+                                                                            <width>0</width>
+                                                                            <height>100</height>
+                                                                        </size>
+                                                                    </property>
+                                                                    <attribute name="title">
+                                                                        <string>Ox</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                                                                        <item>
+                                                                            <widget class="QWidget" name="Xplotview"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_4">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderXcut">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelXcut">
+                                                                                        <property name="text">
+                                                                                            <string>x = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                                <widget class="QWidget" name="xOz">
+                                                                    <attribute name="title">
+                                                                        <string>Oy</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_6">
+                                                                        <item>
+                                                                            <widget class="QWidget" name="Yplotview"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_3">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderYcut">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelYcut">
+                                                                                        <property name="text">
+                                                                                            <string>y = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                                <widget class="QWidget" name="xOy">
+                                                                    <attribute name="title">
+                                                                        <string>Oz</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_8">
+                                                                        <item>
+                                                                            <widget class="QWidget" name="Zplotview"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_2">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderZcut">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelZcut">
+                                                                                        <property name="text">
+                                                                                            <string>z = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                            </widget>
+                                                        </item>
+                                                    </layout>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                        <widget class="QWidget" name="tab_4">
+                                            <attribute name="title">
+                                                <string>Incertitude de Coupe</string>
+                                            </attribute>
+                                            <layout class="QHBoxLayout" name="horizontalLayout_8">
+                                                <item>
+                                                    <layout class="QHBoxLayout" name="horizontalLayout_7">
+                                                        <item>
+                                                            <widget class="QTabWidget" name="TabWidgetVariance">
+                                                                <property name="currentIndex">
+                                                                    <number>2</number>
+                                                                </property>
+                                                                <widget class="QWidget" name="XplotVar">
+                                                                    <attribute name="title">
+                                                                        <string>Ox</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_3">
+                                                                        <item>
+                                                                            <widget class="QWidget"
+                                                                                    name="XplotviewVariance"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_9">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderXcutVariance">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelXcutVariance">
+                                                                                        <property name="text">
+                                                                                            <string>x = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                                <widget class="QWidget" name="YplotVar">
+                                                                    <attribute name="title">
+                                                                        <string>Oy</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_4">
+                                                                        <item>
+                                                                            <widget class="QWidget"
+                                                                                    name="YplotviewVariance"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_10">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderYcutVariance">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelYcutVariance">
+                                                                                        <property name="text">
+                                                                                            <string>y = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                                <widget class="QWidget" name="ZplotVar">
+                                                                    <attribute name="title">
+                                                                        <string>Oz</string>
+                                                                    </attribute>
+                                                                    <layout class="QVBoxLayout" name="verticalLayout_5">
+                                                                        <item>
+                                                                            <widget class="QWidget"
+                                                                                    name="ZplotviewVariance"
+                                                                                    native="true">
+                                                                                <property name="sizePolicy">
+                                                                                    <sizepolicy hsizetype="Expanding"
+                                                                                                vsizetype="Expanding">
+                                                                                        <horstretch>0</horstretch>
+                                                                                        <verstretch>0</verstretch>
+                                                                                    </sizepolicy>
+                                                                                </property>
+                                                                            </widget>
+                                                                        </item>
+                                                                        <item>
+                                                                            <layout class="QHBoxLayout"
+                                                                                    name="horizontalLayout_11">
+                                                                                <item>
+                                                                                    <widget class="QSlider"
+                                                                                            name="sliderZcutVariance">
+                                                                                        <property name="orientation">
+                                                                                            <enum>Qt::Horizontal</enum>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                                <item>
+                                                                                    <widget class="QLabel"
+                                                                                            name="labelZcutVariance">
+                                                                                        <property name="text">
+                                                                                            <string>z = 0.0</string>
+                                                                                        </property>
+                                                                                    </widget>
+                                                                                </item>
+                                                                            </layout>
+                                                                        </item>
+                                                                    </layout>
+                                                                </widget>
+                                                            </widget>
+                                                        </item>
+                                                    </layout>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <layout class="QGridLayout" name="bottomLayout">
+                                        <item row="1" column="2">
+                                            <widget class="QPushButton" name="saveButton">
+                                                <property name="text">
+                                                    <string>Save</string>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                        <item row="1" column="0">
+                                            <widget class="QPushButton" name="GPRstatut">
+                                                <property name="text">
+                                                    <string>Start GPR</string>
+                                                </property>
+                                                <property name="autoDefault">
+                                                    <bool>false</bool>
+                                                </property>
+                                                <property name="default">
+                                                    <bool>false</bool>
+                                                </property>
+                                                <property name="flat">
+                                                    <bool>false</bool>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                            </layout>
+                        </item>
+                    </layout>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>970</width>
+                    <height>21</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QStatusBar" name="statusbar"/>
+    </widget>
+    <customwidgets>
+        <customwidget>
+            <class>GLViewWidget</class>
+            <extends>QOpenGLWidget</extends>
+            <header>pyqtgraph.opengl</header>
+        </customwidget>
+    </customwidgets>
+    <resources/>
+    <connections/>
+</ui>

@@ -29,22 +29,22 @@ class TrackClass:
 
 
 class VisuClass:
-    def __init__(self, d=3, x1=0, x2=1, y1=-2, y2=2, z1=-2, z2=2):
+    def __init__(self, d=3, x1=-2, x2=2, y1=0, y2=2, z1=-2, z2=2):
         self.d = d
         self.x1 = x1
         self.x2 = x2
         self.y1 = y1
         self.y2 = y2
         self.z1 = z1
-        self.z2 = z1
-        self.resX = int(abs(x2 - x1) * d)
-        self.resY = int(abs(y2 - y1) * d)
-        self.resZ = int(abs(z2 - z1) * d)
+        self.z2 = z2
+        self.resX = int(abs(self.x2 - self.x1) * self.d)
+        self.resY = int(abs(self.y2 - self.y1) * self.d)
+        self.resZ = int(abs(self.z2 - self.z1) * self.d)
         # print(self.resX, self.resY, self.resZ)
         self.nbpoint = self.resX * self.resY * self.resZ
-        self.X = np.linspace(x1, x2, self.resX)
-        self.Y = np.linspace(y1, y2, self.resY)
-        self.Z = np.linspace(z1, z2, self.resZ)
+        self.X = np.linspace(self.x1, self.x2, self.resX)
+        self.Y = np.linspace(self.y1, self.y2, self.resY)
+        self.Z = np.linspace(self.z1, self.z2, self.resZ)
         self.Points = self.ListePoints()
         self.Xcut = np.insert(np.transpose([np.tile(self.Y, self.resZ), np.repeat(self.Z, self.resY)]), 0,
                               [0] * (self.resY * self.resZ), axis=1)
@@ -55,7 +55,6 @@ class VisuClass:
         self.xcuut = 0
         self.ycuut = 0
         self.zcuut = 0
-
         self.xcuutVariance = 0
         self.ycuutVariance = 0
         self.zcuutVariance = 0
@@ -123,16 +122,16 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
 
     def setDataForGPR(self, pos, wind):  # fonction qui permet de récuperer les data pour faire le training
 
-        if len(pos) > 30 and len(wind) > 30:
-            self.Xm = pos[-30:]
-            self.Yx = wind[:, 0][-30:]
-            self.Yy = wind[:, 1][-30:]
-            self.Yz = wind[:, 2][-30:]
-        else:
-            self.Xm = pos
-            self.Yx = wind[:, 0]
-            self.Yy = wind[:, 1]
-            self.Yz = wind[:, 2]
+        # if len(pos) > 100 and len(wind) > 100:
+        #     self.Xm = pos[-100:-1]
+        #     self.Yx = wind[:, 0][-100:-1]
+        #     self.Yy = wind[:, 1][-100:-1]
+        #     self.Yz = wind[:, 2][-100:-1]
+        # else:
+        self.Xm = pos
+        self.Yx = wind[:, 0]
+        self.Yy = wind[:, 1]
+        self.Yz = wind[:, 2]
 
     def predictWindGPR(self):
         self.gp1.fit(self.Xm, self.Yx)
@@ -194,7 +193,7 @@ def SmartProbeVect(quat):
 
 
 def WindVect(quat, SPData):
-    vect = [np.cos(SPData[2]), np.sin(SPData[2]), np.sin(SPData[3]), ]  # vecteur du vent dans le repère mouvant
+    vect = [np.sin(SPData[3]), - np.cos(SPData[3]), np.sin(SPData[2])]  # vecteur du vent dans le repère mouvant
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
@@ -211,36 +210,48 @@ def GetOptiTrackData(lalist, rb_id):
             continue
 
 
-def convert_to_alpha(v1, v2):
-    v1y = np.dot(v1, np.array([0, 1, 0]))
-    v1z = np.dot(v1, np.array([0, 0, 1]))
-    v2y = np.dot(v2, np.array([0, 1, 0]))
-    v2z = np.dot(v2, np.array([0, 0, 1]))
-    np.seterr(divide='ignore', invalid='ignore')
-    vect1 = [v1y, v1z] / np.linalg.norm([v1y, v1z])
-    vect2 = [v2y, v2z] / np.linalg.norm([v2y, v2z])
-    return np.degrees(np.arccos(np.dot(vect1, vect2)))
+# def convert_to_alpha(v1, v2):
+#     vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
+#     vect2 = [v1[0], v1[1], v1[2]] / np.linalg.norm([v1[0], v1[1], v1[2]])
+#
+#     v1y = np.dot(v1, np.array([0, 1, 0]))
+#     v1z = np.dot(v1, np.array([0, 0, 1]))
+#     v2y = np.dot(v2, np.array([0, 1, 0]))
+#     v2z = np.dot(v2, np.array([0, 0, 1]))
+#     np.seterr(divide='ignore', invalid='ignore')
+#     vect1 = [v1y, v1z] / np.linalg.norm([v1y, v1z])
+#     vect2 = [v2y, v2z] / np.linalg.norm([v2y, v2z])
+#     return np.degrees(np.arccos(np.dot(vect1, vect2)))
 
 
 def convert_to_beta(v1, v2):
-    v1x = np.dot(v1, np.array([1, 0, 0]))
-    v1y = np.dot(v1, np.array([0, 1, 0]))
-    v2x = np.dot(v2, np.array([1, 0, 0]))
-    v2y = np.dot(v2, np.array([0, 1, 0]))
     np.seterr(divide='ignore', invalid='ignore')
-    vect1 = [v1x, v1y] / np.linalg.norm([v1x, v1y])
-    vect2 = [v2x, v2y] / np.linalg.norm([v2x, v2y])
-    return np.degrees(np.arccos(np.dot(vect1, vect2)))
+    vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
+    vect2 = [v2[0], v2[1], 0] / np.linalg.norm([v2[0], v2[1], 0])
+    if v1[0] < v2[0]:
+        return np.degrees(np.arccos(np.dot(vect1, vect2)))
+    else:
+        return -np.degrees(np.arccos(np.dot(vect1, vect2)))
+
+
+def convert_to_alpha(v1, v2):
+    np.seterr(divide='ignore', invalid='ignore')
+    vect1 = [0, v1[1], v1[2]] / np.linalg.norm([0, v1[1], v1[2]])
+    vect2 = [0, v2[1], v2[2]] / np.linalg.norm([0, v2[1], v2[2]])
+    if v1[2] < v2[2]:
+        return +np.degrees(np.arccos(np.dot(vect1, vect2)))
+    else:
+        return -np.degrees(np.arccos(np.dot(vect1, vect2)))
 
 
 def pitch_angle(v1):
-    v1x = np.dot(v1, np.array([1, 0, 0]))
-    v1z = np.dot(v1, np.array([0, 0, 1]))
     np.seterr(divide='ignore', invalid='ignore')
-    vect1 = [v1x, v1z] / np.linalg.norm([v1x, v1z])
-    vect2 = [1, 0] / np.linalg.norm([1, 0])
-    # np.seterr(divide='ignore', invalid='ignore')
-    return np.degrees(np.arccos(np.dot(vect1, vect2)))
+    vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
+    vect2 = [v1[0], v1[1], v1[2]] / np.linalg.norm([v1[0], v1[1], v1[2]])
+    if v1[2] < 0:
+        return +np.degrees(np.arccos(np.dot(vect1, vect2)))
+    else:
+        return -np.degrees(np.arccos(np.dot(vect1, vect2)))
 
 
 class SerialTutorial:
@@ -293,6 +304,7 @@ class SerialTutorial:
         EAS = float(a[11].split(' ')[-1])
         alpha = float(a[12].split(' ')[-1])
         beta = float(a[13].split(' ')[-1])
+        # print(pprz_message)
         self.smartprobeData = np.array([TAS, EAS, alpha, beta])
         # with open('Data/SmartProbeData.csv', 'w', newline='') as f:
         #     dataWriter = csv.writer(f)
@@ -301,8 +313,12 @@ class SerialTutorial:
 
 
 def fonctionvent(X, Y, Z):
-    u = 1 - X
-    v = -Y * (1 - X)
+    # u = 1 - X
+    # v = -Y * (1 - X)
+    # w = -Z
+
+    u = -X * (1 - Y)
+    v = -(1 - Y)
     w = -Z
 
     return np.array([u, v, w])
@@ -310,6 +326,6 @@ def fonctionvent(X, Y, Z):
 
 def VarianceToColor(variance):
     a = 0
-    b = 0.4
+    b = 0.2
     rgb = colorsys.hsv_to_rgb((b - variance) / (3 * (b - a)), 1.0, 1.0)
     return tuple([round(255 * x) for x in rgb])

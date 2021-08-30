@@ -1,6 +1,6 @@
 from time import sleep
 from pyqtgraph.Qt import QtWidgets
-from design import app_1
+from WEGPR import app_1
 import sys
 
 if __name__ == '__main__':
