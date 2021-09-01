@@ -104,7 +104,7 @@ class MainApplication(QtWidgets.QMainWindow):
         self.timer = None
 
         if dev == 0:
-            self.c = 0  # counter used to get the data for the simulation
+            self.pointer = 0  # counter used to get the data for the simulation
             pass
 
         if dev == 1:
@@ -410,157 +410,69 @@ class MainApplication(QtWidgets.QMainWindow):
         self.timer.start()
 
     def update(self):
+        global quaternion, mainPos, WindP2prim, smartProbeData
         try:
             if dev == 0:
-                OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
-                smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
-                mainPos = OptiData[1:4]
-                quaternion = OptiData[4:8]
-
-                """Il s'agit de la partie SmartProbe"""
-                SPP2prim = SmartProbeVect(quaternion)
-                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
-
-                SPpos = np.array([mainPos, SPP2])
-                # self.SmartProbe.setData(pos=SPpos)
-
-                # ############################################################
-                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
-                WindP2prim = WindVect(quaternion, smartProbeData)
-                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-                Windpos = np.array([mainPos, WindP2])
-                # self.Wind.setData(pos=Windpos)
-
-                WindDotpos = np.array([WindP2])
-                # self.WindVectDot.setData(pos=WindDotpos)
-                ############################################################
-                """Il s'agit de la partie position temps reel"""
-                self.xyzPosition.setText(
-                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-                    % (mainPos[0], mainPos[1], mainPos[2]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                self.angleofattackLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-                self.sideslipeLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+                if not self.stateGPRbutton:
+                    L = np.array(tail('Data/testdata.csv', 1000))
+                    OptiData = L[self.worker1.pointer]
+                    smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
+                    mainPos = OptiData[1:4]
+                    quaternion = OptiData[4:8]
+                else:
+                    OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
+                    smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
+                    mainPos = OptiData[1:4]
+                    quaternion = OptiData[4:8]
+                WindP2prim = fonctionvent(mainPos[0], mainPos[1], mainPos[2])
 
             if dev == 1:
                 OptiData = GetOptiTrackData(self.natnet.rigidBodyList, Main.SPid)
                 smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
                 mainPos = OptiData[0]
                 quaternion = OptiData[1]
-
-                """Il s'agit de la partie SmartProbe"""
-                SPP2prim = SmartProbeVect(quaternion)
-                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
-
-                SPpos = np.array([mainPos, SPP2])
-                self.SmartProbe.setData(pos=SPpos)
-
-                # ############################################################
-                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
                 WindP2prim = WindVect(quaternion, smartProbeData)
-                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-                Windpos = np.array([mainPos, WindP2])
-                self.Wind.setData(pos=Windpos)
-
-                WindDotpos = np.array([WindP2])
-                self.WindVectDot.setData(pos=WindDotpos)
-                ############################################################
-                """Il s'agit de la partie position temps reel"""
-                self.xyzPosition.setText(
-                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-                    % (mainPos[0], mainPos[1], mainPos[2]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                self.angleofattackLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-                self.sideslipeLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
             if dev == 2:
                 OptiData = GetOptiTrackData(self.natnet.rigidBodyList, Main.SPid)
                 smartProbeData = self.serial.smartprobeData
                 mainPos = OptiData[0]
                 quaternion = OptiData[1]
-
-                """Il s'agit de la partie SmartProbe"""
-                SPP2prim = SmartProbeVect(quaternion)
-                SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
-
-                SPpos = np.array([mainPos, SPP2])
-                self.SmartProbe.setData(pos=SPpos)
-
-                # ############################################################
-                """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
                 WindP2prim = WindVect(quaternion, smartProbeData)
-                WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-                Windpos = np.array([mainPos, WindP2])
-                self.Wind.setData(pos=Windpos)
 
-                WindDotpos = np.array([WindP2])
-                self.WindVectDot.setData(pos=WindDotpos)
-                ############################################################
-                """Il s'agit de la partie position temps reel"""
-                self.xyzPosition.setText(
-                    "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-                    % (mainPos[0], mainPos[1], mainPos[2]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-                self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                self.angleofattackLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-                self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-                self.sideslipeLabelValue.setText(
-                    "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+            """Il s'agit de la partie SmartProbe"""
+            SPP2prim = SmartProbeVect(quaternion)
+            SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
 
-            # ############################################################
-            # """Il s'agit de la partie SmartProbe"""
-            # SPP2prim = SmartProbeVect(quaternion)
-            # SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
-            #
-            # SPpos = np.array([mainPos, SPP2])
-            # self.SmartProbe.setData(pos=SPpos)
-            #
-            # # ############################################################
-            # """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
+            SPpos = np.array([mainPos, SPP2])
+            self.SmartProbe.setData(pos=SPpos)
+
+            ###########################################################
+            """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
             # WindP2prim = WindVect(quaternion, smartProbeData)
-            # WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-            # Windpos = np.array([mainPos, WindP2])
-            # self.Wind.setData(pos=Windpos)
-            #
-            # WindDotpos = np.array([WindP2])
-            # self.WindVectDot.setData(pos=WindDotpos)
-            # ############################################################
-            # """Il s'agit de la partie position temps reel"""
-            # self.xyzPosition.setText("<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-            #                          % (mainPos[0], mainPos[1], mainPos[2]))
-            # self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-            # # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-            # self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-            # # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-            # self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-            # self.angleofattackLabelValue.setText(
-            #     "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-            # self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-            # self.sideslipeLabelValue.setText(
-            #     "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+            # WindP2prim = fonctionvent(mainPos[0], mainPos[1], mainPos[2])
+            WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
+            Windpos = np.array([mainPos, WindP2])
+            self.Wind.setData(pos=Windpos)
 
-            ############################################################
+            WindDotpos = np.array([WindP2])
+            self.WindVectDot.setData(pos=WindDotpos)
 
-            # TrackStorage and ploting
-            # self.Trackplot.setData(pos=np.array(Track.recentTrack))
+            """Il s'agit de la partie position temps reel"""
+            self.xyzPosition.setText(
+                "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
+                % (mainPos[0], mainPos[1], mainPos[2]))
+            self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+            # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+            self.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
+            # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
+            self.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
+            self.angleofattackLabelValue.setText(
+                "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
+            self.pitchangleLabelValue.setText(
+                "<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
+            self.sideslipeLabelValue.setText(
+                "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
 
         except (TypeError, IndexError):
             pass
@@ -570,6 +482,7 @@ class computeThread(QtCore.QObject):
     def __init__(self):
         super(computeThread, self).__init__()
         self.isRunning = True
+        self.pointer = 0
 
     def run(self):
         while self.isRunning:
@@ -577,47 +490,10 @@ class computeThread(QtCore.QObject):
 
                 if dev == 0:
                     L = np.array(tail('Data/testdata.csv', 1000))
-                    OptiData = L[Main.c]
-                    Main.c += 1
-                    # OptiData = np.array(tail('Data/OptiTrackData.csv', 1)[0])
-                    smartProbeData = np.array(tail('Data/SmartProbeData.csv', 1)[0])
+                    OptiData = L[self.pointer]
+                    self.pointer += 1
                     mainPos = OptiData[1:4]
-                    quaternion = OptiData[4:8]
-
-                    """Il s'agit de la partie SmartProbe"""
-                    SPP2prim = SmartProbeVect(quaternion)
-                    SPP2 = tuple([mainPos[0] + SPP2prim[0], mainPos[1] + SPP2prim[1], mainPos[2] + SPP2prim[2]])
-
-                    SPpos = np.array([mainPos, SPP2])
-                    Main.SmartProbe.setData(pos=SPpos)
-
-                    ############################################################
-                    """Il s'agit de la partie du Vecteur vent avec le bout du vecteur"""
-                    # WindP2prim = WindVect(quaternion, smartProbeData)
                     WindP2prim = fonctionvent(mainPos[0], mainPos[1], mainPos[2])
-                    WindP2 = tuple([mainPos[0] + WindP2prim[0], mainPos[1] + WindP2prim[1], mainPos[2] + WindP2prim[2]])
-                    Windpos = np.array([mainPos, WindP2])
-                    Main.Wind.setData(pos=Windpos)
-
-                    WindDotpos = np.array([WindP2])
-                    Main.WindVectDot.setData(pos=WindDotpos)
-
-                    """Il s'agit de la partie position temps reel"""
-                    Main.xyzPosition.setText(
-                        "<html><head/><body><p>x=%0.001f</p><p>y=%0.001f</p><p>z=%0.001f</p></body></html>"
-                        % (mainPos[0], mainPos[1], mainPos[2]))
-                    Main.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                    # self.angleofattackLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                    Main.pitchangleLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[2]))
-                    # self.sideslipeLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[3]))
-                    Main.SpeedLabelValue.setText("<html><head/><body>%0.001f</body></html>" % (smartProbeData[0]))
-                    Main.angleofattackLabelValue.setText(
-                        "<html><head/><body>%0.001f</body></html>" % (convert_to_alpha(SPP2prim, WindP2prim)))
-                    Main.pitchangleLabelValue.setText(
-                        "<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
-                    Main.sideslipeLabelValue.setText(
-                        "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
-
                     Track.TrackStorage(mainPos, WindP2prim)
 
                 if dev == 1:
