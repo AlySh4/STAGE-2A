@@ -25,7 +25,7 @@ def animate(t):
     y = 1 / 2 * np.sin(t / 10) + 1 / 2
     z = np.sin(t)
     ax1.scatter(x, y, z)
-    f = open('testdata.csv', 'a')
+    f = open('Data/testdata.csv', 'a')
     f.write("217,{},{},{},0,0,0,1,True\n".format(x, y, z))
     f.close()
 

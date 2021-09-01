@@ -39,7 +39,7 @@ track = dict([(ac_id, deque()) for ac_id in id_dict.keys()])
 def storeOptiTrackData():
     while True:
 
-        with open('Data/OptiTrackData.csv', 'w', newline='') as f:
+        with open('../Data/OptiTrackData.csv', 'w', newline='') as f:
             dataWriter = csv.writer(f, escapechar=' ', quoting=csv.QUOTE_NONE)
             a = list(natnet.rigidBodyList[0])
             b = []

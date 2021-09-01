@@ -56,7 +56,7 @@ class SerialTutorial:
         EAS = float(a[11].split(' ')[-1])
         alpha = float(a[12].split(' ')[-1])
         beta = float(a[13].split(' ')[-1])
-        with open('Data/SmartProbeData.csv', 'w', newline='') as f:
+        with open('../Data/SmartProbeData.csv', 'w', newline='') as f:
             dataWriter = csv.writer(f)
             dataWriter.writerow([TAS, EAS, alpha, beta])
             f.flush()

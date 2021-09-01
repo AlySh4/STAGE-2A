@@ -120,7 +120,10 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.varianceY = None
         self.varianceZ = None
 
-    def setDataForGPR(self, pos, wind):  # fonction qui permet de récuperer les data pour faire le training
+    def setDataForGPR(self, pos, wind):
+        """
+        method to get the GPR traing set
+        """
 
         # if len(pos) > 100 and len(wind) > 100:
         #     self.Xm = pos[-100:-1]
@@ -134,6 +137,9 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.Yz = wind[:, 2]
 
     def predictWindGPR(self):
+        """
+        To predict the GPR and the variance of each component
+        """
         self.gp1.fit(self.Xm, self.Yx)
         self.gp2.fit(self.Xm, self.Yy)
         self.gp3.fit(self.Xm, self.Yz)
@@ -145,9 +151,15 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         self.varianceZ = np.diagonal(covz)
 
     def Variance(self, i):
+        """
+        Get the max of the three varaince for a point in the studied space.
+        """
         return max(self.varianceX[i], self.varianceY[i], self.varianceZ[i])
 
     def VarianceSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
+        """
+
+        """
         if component == 'x' or component == 'all':
             self.Xcut_predVariance = self.varianceX[Xcut * (resY * resZ):(Xcut + 1) * (resY * resZ)]
         if component == 'y' or component == 'all':
@@ -173,11 +185,6 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
         if component == 'z' or component == 'all':
             self.Zcut_pred = self.Yz_pred[Zcut::resZ]
 
-    # def predictWindSecViewGPR(self, Xcut, Ycut, Zcut):
-    #     self.Xcut_pred = self.gp1.predict(Xcut)
-    #     self.Ycut_pred = self.gp2.predict(Ycut)
-    #     self.Zcut_pred = self.gp3.predict(Zcut)
-
 
 def tail(fn, n):
     with open(fn, 'r') as f:
@@ -187,13 +194,13 @@ def tail(fn, n):
 
 
 def SmartProbeVect(quat):
-    vect = [0, -0.5, 0]  # vecteur dans le repère mouvant
+    vect = [0, -0.5, 0]  # SP vector in the mooving coordonate system
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
 
 
 def WindVect(quat, SPData):
-    vect = [np.sin(SPData[3]), - np.cos(SPData[3]), np.sin(SPData[2])]  # vecteur du vent dans le repère mouvant
+    vect = [np.sin(SPData[3]), - np.cos(SPData[3]), np.sin(SPData[2])]  # WindVector in the mooving coordonate system
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
@@ -201,27 +208,10 @@ def WindVect(quat, SPData):
 
 def GetOptiTrackData(lalist, rb_id):
     for (ac_id, pos, quat, valid) in lalist:
-        # if not valid:
-        #     # skip if rigid body is not valid
-        #     continue
         if ac_id == rb_id:
             return np.array(pos), np.array(quat)
         else:
             continue
-
-
-# def convert_to_alpha(v1, v2):
-#     vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
-#     vect2 = [v1[0], v1[1], v1[2]] / np.linalg.norm([v1[0], v1[1], v1[2]])
-#
-#     v1y = np.dot(v1, np.array([0, 1, 0]))
-#     v1z = np.dot(v1, np.array([0, 0, 1]))
-#     v2y = np.dot(v2, np.array([0, 1, 0]))
-#     v2z = np.dot(v2, np.array([0, 0, 1]))
-#     np.seterr(divide='ignore', invalid='ignore')
-#     vect1 = [v1y, v1z] / np.linalg.norm([v1y, v1z])
-#     vect2 = [v2y, v2z] / np.linalg.norm([v2y, v2z])
-#     return np.degrees(np.arccos(np.dot(vect1, vect2)))
 
 
 def convert_to_beta(v1, v2):
@@ -281,13 +271,8 @@ class SerialTutorial:
 
         try:
             self.serial_interface.start()
-
             # give the thread some time to properly start
             time.sleep(0.1)
-
-            # while self.serial_interface.isAlive():
-            #     self.serial_interface.join(1)
-
         except (KeyboardInterrupt, SystemExit):
             print('Shutting down...')
             self.serial_interface.stop()
@@ -304,19 +289,10 @@ class SerialTutorial:
         EAS = float(a[11].split(' ')[-1])
         alpha = float(a[12].split(' ')[-1])
         beta = float(a[13].split(' ')[-1])
-        # print(pprz_message)
         self.smartprobeData = np.array([TAS, EAS, alpha, beta])
-        # with open('Data/SmartProbeData.csv', 'w', newline='') as f:
-        #     dataWriter = csv.writer(f)
-        #     dataWriter.writerow([TAS, EAS, alpha, beta])
-        #     f.flush()
 
 
 def fonctionvent(X, Y, Z):
-    # u = 1 - X
-    # v = -Y * (1 - X)
-    # w = -Z
-
     u = -X * (1 - Y)
     v = -(1 - Y)
     w = -Z
