@@ -1,3 +1,27 @@
+"""
+MIT License
+
+Copyright (c) 2021 Aly SHAHIN <aly.shahin4@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import colorsys
 from collections import deque
 import numpy as np
@@ -29,6 +53,10 @@ class TrackClass:
 
 
 class VisuClass:
+    """
+    Class deals with everything relative tot the configuration of
+    """
+
     def __init__(self, d=3, x1=-2, x2=2, y1=0, y2=2, z1=-2, z2=2):
         self.d = d
         self.x1 = x1
@@ -88,7 +116,11 @@ class VisuClass:
         return A + self.Points
 
 
-class GPRClass:  # TODO: Verifier la fonction de covariance
+class GPRClass:
+    """
+    Class deals woth everything relative to the Gaussian process Regeression Algorithm
+    """
+
     def __init__(self, l=0.1, sigma_f=1, espace=None):
         self.l = l
         self.sigma_f = sigma_f
@@ -158,7 +190,7 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
 
     def VarianceSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
         """
-
+        Take a cut of the choosen space to calculate the incertitude on the secondary view
         """
         if component == 'x' or component == 'all':
             self.Xcut_predVariance = self.varianceX[Xcut * (resY * resZ):(Xcut + 1) * (resY * resZ)]
@@ -173,6 +205,9 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
             self.Zcut_predVariance = self.varianceZ[Zcut::resZ]
 
     def WindSecViewGPR(self, component, resX, resY, resZ, Xcut, Ycut, Zcut):
+        """
+        Take a cut of the choosen space to calculate the wind projection on the secondary view
+        """
         if component == 'x' or component == 'all':
             self.Xcut_pred = self.Yx_pred[Xcut * (resY * resZ):(Xcut + 1) * (resY * resZ)]
         if component == 'y' or component == 'all':
@@ -187,6 +222,9 @@ class GPRClass:  # TODO: Verifier la fonction de covariance
 
 
 def tail(fn, n):
+    """
+    Take the last n line of a fn file into an np.array
+    """
     with open(fn, 'r') as f:
         lines = f.readlines()
         # print (lines)
@@ -194,12 +232,18 @@ def tail(fn, n):
 
 
 def SmartProbeVect(quat):
+    """
+    Calculate the smartprobe vect from the mooving coordonate sytem to the global coordonate system
+    """
     vect = [0, -0.5, 0]  # SP vector in the mooving coordonate system
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
     return rotation.apply(vect)
 
 
 def WindVect(quat, SPData):
+    """
+    Calculate the WindVect from the mooving coordonate sytem to the global coordonate system
+    """
     vect = [np.sin(SPData[3]), - np.cos(SPData[3]), np.sin(SPData[2])]  # WindVector in the mooving coordonate system
     vect = (vect / np.linalg.norm(vect)) * (SPData[0] / 10)
     rotation = Rot.from_quat([quat[0], quat[1], quat[2], quat[3]])
@@ -207,6 +251,9 @@ def WindVect(quat, SPData):
 
 
 def GetOptiTrackData(lalist, rb_id):
+    """
+    Get the Data of the optiTrack with a right format and directly from eht streamed source
+    """
     for (ac_id, pos, quat, valid) in lalist:
         if ac_id == rb_id:
             return np.array(pos), np.array(quat)
@@ -215,6 +262,9 @@ def GetOptiTrackData(lalist, rb_id):
 
 
 def convert_to_beta(v1, v2):
+    """
+    Calculate the Beta angle to display it in the real time section of the interface
+    """
     np.seterr(divide='ignore', invalid='ignore')
     vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
     vect2 = [v2[0], v2[1], 0] / np.linalg.norm([v2[0], v2[1], 0])
@@ -225,6 +275,9 @@ def convert_to_beta(v1, v2):
 
 
 def convert_to_alpha(v1, v2):
+    """
+    Calculate the Aplha angle to display it in the real time section of the interface
+    """
     np.seterr(divide='ignore', invalid='ignore')
     vect1 = [0, v1[1], v1[2]] / np.linalg.norm([0, v1[1], v1[2]])
     vect2 = [0, v2[1], v2[2]] / np.linalg.norm([0, v2[1], v2[2]])
@@ -235,6 +288,9 @@ def convert_to_alpha(v1, v2):
 
 
 def pitch_angle(v1):
+    """
+    Calculate the Pitch angle to display it in the real time section of the interface
+    """
     np.seterr(divide='ignore', invalid='ignore')
     vect1 = [v1[0], v1[1], 0] / np.linalg.norm([v1[0], v1[1], 0])
     vect2 = [v1[0], v1[1], v1[2]] / np.linalg.norm([v1[0], v1[1], v1[2]])
@@ -293,6 +349,9 @@ class SerialTutorial:
 
 
 def fonctionvent(X, Y, Z):
+    """
+    Fonction that is used to simulate the Wind field in the space, and that is suppoosed to be found by the GPR.
+    """
     u = -X * (1 - Y)
     v = -(1 - Y)
     w = -Z
@@ -301,6 +360,12 @@ def fonctionvent(X, Y, Z):
 
 
 def VarianceToColor(variance):
+    """
+    Configures the colors of the Variance displayed on the 3D interface.
+
+    Note: a and b have to be configured depending on the "fonction vent"
+    they represent the max et min variance of the space
+    """
     a = 0
     b = 0.2
     rgb = colorsys.hsv_to_rgb((b - variance) / (3 * (b - a)), 1.0, 1.0)

@@ -1,3 +1,27 @@
+"""
+MIT License
+
+Copyright (c) 2021 Aly SHAHIN <aly.shahin4@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import sys
 import pyqtgraph.opengl as gl
 import matplotlib.pyplot as plt
@@ -51,7 +75,7 @@ class ConfigurationWindow(form_2, base_2):
             Visu.y2 = self.spinBoxY2.value()
             Visu.z1 = self.spinBoxZ1.value()
             Visu.z2 = self.spinBoxZ2.value()
-            Visu.d = self.spinBobRes.value()
+            Visu.d = self.spinBoxRes.value()
             self.close()
         else:
             self.info.setText("Please verify your values")
@@ -148,6 +172,9 @@ class MainApplication(QtWidgets.QMainWindow):
         self.resetButton.clicked.connect(openconf)
 
     def ButtonStatusInit(self):
+        """
+        Initialising of the button relative to GPR
+        """
         self.stateGPRbutton = True
         self.GPRstatut.setStyleSheet("background-color: green")
         self.GPRstatut.pressed.connect(self.ComputeThreadCall)
@@ -158,6 +185,9 @@ class MainApplication(QtWidgets.QMainWindow):
         self.GPRShowingButton.pressed.connect(self.WindDistributionShowingstate)
 
     def WindDistributionShowingstate(self):
+        """
+        Configure the color of the GPR buttons depending on the state of the GPR
+        """
         if self.counter:
             if self.stateGPRShowing:
                 self.WindDistribution.setData(color=(0, 0, 0, 0))
@@ -193,7 +223,7 @@ class MainApplication(QtWidgets.QMainWindow):
 
     def secondaryViewplotVariance(self):
         """
-        Method that defines
+        Method that configure the visual of the secondary View, specially for the "Incertitude de coupe" Tab
         """
         self.XviewVar = MatplotlibWidget()
         self.YviewVar = MatplotlibWidget()
@@ -268,6 +298,9 @@ class MainApplication(QtWidgets.QMainWindow):
         self.sliderYcutVariance.valueChanged.connect(changeValueYVar)
 
     def secondaryViewplot(self):
+        """
+        Method that configure the visual of the secondary View, specially for the "Plan de coupe" Tab
+        """
         self.Xview = MatplotlibWidget()
         self.Yview = MatplotlibWidget()
         self.Zview = MatplotlibWidget()
@@ -346,20 +379,32 @@ class MainApplication(QtWidgets.QMainWindow):
         self.sliderYcut.valueChanged.connect(changeValueY)
 
     def SmartProbeView(self):
+        """
+        adds the SmartProbe to the scene
+        """
         self.SmartProbe = gl.GLLinePlotItem(width=1, antialias=False)
         self.mainView.addItem(self.SmartProbe)
 
     def WindDistributionView(self):
+        """
+        adds the Wind field to the scene
+        """
         self.WindDistribution = gl.GLLinePlotItem(color=(0, 255, 127, 1), width=0.1, mode='lines')
         self.mainView.addItem(self.WindDistribution)
 
     def WindVect(self):
+        """
+        adds the instant wind vector to the scene
+        """
         self.WindVectDot = gl.GLScatterPlotItem(size=15, color=(1, 0, 0, 1))
         self.mainView.addItem(self.WindVectDot)
         self.Wind = gl.GLLinePlotItem(width=3, color=(1, 0, 0, 1), antialias=False)
         self.mainView.addItem(self.Wind)
 
     def WallsAndGround(self):
+        """
+        draws the walls and the ground of the 3D view
+        """
         ground = gl.GLGridItem(size=Vector(10, 10, 0), antialias=False)
         Wall1 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
         Wall2 = gl.GLGridItem(size=Vector(10, 10, 0), antialias=True)
@@ -372,6 +417,11 @@ class MainApplication(QtWidgets.QMainWindow):
         self.mainView.addItem(Wall2)
 
     def ButtonConnection(self):
+        """
+        defines the 3D view button
+
+        """
+
         def xOyView():
             self.mainView.setCameraPosition(pos=Vector(0, 0, 0), elevation=90, azimuth=270, distance=5)  # xOy
 
@@ -390,6 +440,9 @@ class MainApplication(QtWidgets.QMainWindow):
         self.resetPButton.clicked.connect(resetView)
 
     def axis(self):
+        """
+        draws the axis
+        """
 
         self.mainView.addItem(gl.GLAxisItem(size=Vector(1, 1, 1)))
         self.XcordLabel = gl.GLLinePlotItem(color=(231, 37, 131, 0.4), width=0.3, mode='lines', antialias=True)
@@ -410,6 +463,9 @@ class MainApplication(QtWidgets.QMainWindow):
         self.timer.start()
 
     def update(self):
+        """
+        CallBack function that update the displayed data
+        """
         global quaternion, mainPos, WindP2prim, smartProbeData
         try:
             if dev == 0:
@@ -473,12 +529,17 @@ class MainApplication(QtWidgets.QMainWindow):
                 "<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
             self.sideslipeLabelValue.setText(
                 "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
+            print(Visu.x2, Visu.resX)
 
         except (TypeError, IndexError):
             pass
 
 
 class computeThread(QtCore.QObject):
+    """
+    Calculus Thread that compute the GPR
+    """
+
     def __init__(self):
         super(computeThread, self).__init__()
         self.isRunning = True
