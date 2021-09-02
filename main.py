@@ -529,7 +529,6 @@ class MainApplication(QtWidgets.QMainWindow):
                 "<html><head/><body>%0.001f</body></html>" % (pitch_angle(SPP2prim)))
             self.sideslipeLabelValue.setText(
                 "<html><head/><body>%0.001f</body></html>" % (convert_to_beta(SPP2prim, WindP2prim)))
-            print(Visu.x2, Visu.resX)
 
         except (TypeError, IndexError):
             pass
